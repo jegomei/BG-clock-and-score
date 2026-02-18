@@ -11,32 +11,114 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* Tema claro */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --container-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --border-color: #ddd;
+            --input-bg: #ffffff;
+            --input-border: #ddd;
+            --table-header-bg: #667eea;
+            --table-header-text: #ffffff;
+            --table-row-bg: #ffffff;
+            --table-row-alt: #f8f9fa;
+            --table-total-bg: #f0f0f0;
+            --button-bg: #667eea;
+            --button-hover: #5568d3;
+            --button-secondary: #95a5a6;
+            --button-secondary-hover: #7f8c8d;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --info-box-bg: #e3f2fd;
+            --info-box-border: #2196f3;
+        }
+
+        body.dark-theme {
+            /* Tema oscuro */
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: #0f1419;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --primary-color: #7b68ee;
+            --secondary-color: #9370db;
+            --border-color: #2d3748;
+            --input-bg: #1a202c;
+            --input-border: #2d3748;
+            --table-header-bg: #7b68ee;
+            --table-header-text: #ffffff;
+            --table-row-bg: #1a202c;
+            --table-row-alt: #252d3a;
+            --table-total-bg: #2d3748;
+            --button-bg: #7b68ee;
+            --button-hover: #6a5acd;
+            --button-secondary: #4a5568;
+            --button-secondary-hover: #2d3748;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --info-box-bg: #1e2936;
+            --info-box-border: #4299e1;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--button-bg);
+            border: none;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .theme-icon {
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
             padding: 10px;
             -webkit-text-size-adjust: 100%;
+            transition: background 0.3s ease;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: white;
+            background: var(--container-bg);
             border-radius: 15px;
             padding: 20px 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            transition: all 0.3s ease;
         }
 
         h1 {
             text-align: center;
-            color: #667eea;
+            color: var(--primary-color);
             margin-bottom: 20px;
             font-size: 24px;
         }
 
         h2 {
-            color: #764ba2;
+            color: var(--secondary-color);
             margin-bottom: 15px;
             font-size: 20px;
         }
@@ -49,6 +131,126 @@
             display: block;
         }
 
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            text-align: center;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo-container {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        .app-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Si no hay logo, mostrar un placeholder */
+        .app-logo[src="logo.png"] {
+            display: none;
+        }
+
+        .app-logo:not([src="logo.png"]) {
+            display: block;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        body.dark-theme .welcome-title {
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .game-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .game-input-large {
+            flex: 1;
+            max-width: 400px;
+            padding: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-next-btn {
+            width: 60px;
+            height: 60px;
+            min-height: 60px;
+            padding: 0;
+            margin: 0;
+            border-radius: 50%;
+            background: var(--button-bg);
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .game-next-btn:active {
+            background: var(--button-hover);
+            transform: scale(0.95);
+        }
+
+        body:not(.dark-theme) .game-input-large {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .game-input-large:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 4px rgba(255, 255, 255, 0.1);
+            background: white;
+        }
+
+        .game-input-large::placeholder {
+            color: #999;
+            font-weight: 300;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -57,7 +259,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
         }
 
         input[type="text"],
@@ -65,17 +267,19 @@
         textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--input-border);
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
 
         input[type="text"]:focus,
         input[type="number"]:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary-color);
         }
 
         .player-input {
@@ -142,7 +346,7 @@
         }
 
         button {
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             border: none;
             padding: 14px 24px;
@@ -157,16 +361,16 @@
         }
 
         button:active {
-            background: #5568d3;
+            background: var(--button-hover);
             transform: scale(0.98);
         }
 
         button.secondary {
-            background: #95a5a6;
+            background: var(--button-secondary);
         }
 
         button.secondary:active {
-            background: #7f8c8d;
+            background: var(--button-secondary-hover);
         }
 
         .add-player-btn {
@@ -244,15 +448,16 @@
         .score-table th,
         .score-table td {
             padding: 10px 5px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             text-align: center;
             font-size: 14px;
             min-width: 60px;
+            color: var(--text-primary);
         }
 
         .score-table th {
-            background: #667eea;
-            color: white;
+            background: var(--table-header-bg);
+            color: var(--table-header-text);
             position: sticky;
             top: 0;
             z-index: 10;
@@ -264,8 +469,10 @@
             padding: 8px 4px;
             text-align: center;
             font-size: 16px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
 
         /* Primera columna fija en móvil */
@@ -273,23 +480,23 @@
         .score-table th:first-child {
             position: sticky;
             left: 0;
-            background: white;
+            background: var(--table-row-bg);
             z-index: 5;
             font-weight: 600;
             min-width: 80px;
         }
 
         .score-table th:first-child {
-            background: #667eea;
+            background: var(--table-header-bg);
             z-index: 15;
         }
 
         .scoring-item {
-            background: #f8f9fa;
+            background: var(--table-row-alt);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--primary-color);
         }
 
         .scoring-item-header {
@@ -345,8 +552,8 @@
         }
 
         .order-item {
-            background: white;
-            border: 2px solid #667eea;
+            background: var(--container-bg);
+            border: 2px solid var(--primary-color);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
@@ -354,16 +561,16 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px var(--shadow-color);
         }
 
         .order-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 10px var(--shadow-color);
         }
 
         .order-number {
-            background: #667eea;
+            background: var(--primary-color);
             color: white;
             width: 35px;
             height: 35px;
@@ -380,6 +587,7 @@
             font-size: 18px;
             font-weight: 600;
             flex-grow: 1;
+            color: var(--text-primary);
         }
 
         .order-controls {
@@ -389,7 +597,7 @@
         }
 
         .order-btn {
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             border: none;
             width: 35px;
@@ -404,7 +612,7 @@
         }
 
         .order-btn:active {
-            background: #5568d3;
+            background: var(--button-hover);
         }
 
         .order-btn:disabled {
@@ -531,7 +739,7 @@
             text-align: center;
             margin-bottom: 20px;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             border-radius: 10px;
         }
@@ -567,26 +775,103 @@
         }
 
         .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            background: var(--info-box-bg);
+            border-left: 4px solid var(--info-box-border);
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 4px;
+            color: var(--text-primary);
+        }
+
+        .footer-credit {
+            text-align: center;
+            padding: 20px 10px 10px 10px;
+            margin-top: 30px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .footer-credit.footer-outside {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .footer-credit.footer-outside strong {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Ocultar footer en pantallas de temporizador */
+        #timerScreen ~ .footer-credit.footer-outside,
+        #orderPlayersScreen.active ~ .footer-credit.footer-outside,
+        body:has(#timerScreen.active) .footer-credit.footer-outside,
+        body:has(#orderPlayersScreen.active) .footer-credit.footer-outside {
+            display: none;
+        }
+
+        .footer-credit a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .footer-credit a:active {
+            opacity: 0.7;
+        }
+
+        /* Pantalla de bienvenida sin contenedor */
+        #setupScreen .container {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 20px 15px !important;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-top: 60px;
         }
     </style>
 </head>
 <body>
+    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema">
+        <span class="theme-icon">🌙</span>
+    </button>
+    
     <div class="container">
         <!-- Pantalla 1: Configuración inicial -->
         <div id="setupScreen" class="screen active">
-            <h1>🎲 Tracker de Juegos de Mesa</h1>
-            
-            <div class="form-group">
-                <label for="gameName">Nombre del juego:</label>
-                <input type="text" id="gameName" placeholder="Ej: Catan, Carcassonne, Ticket to Ride...">
-                <div id="gameNameError" class="error"></div>
+            <div class="welcome-screen">
+                <div class="logo-container">
+                    <img src="logo.png" alt="Board Game Tracker" id="appLogo" class="app-logo">
+                </div>
+                
+                <h1 class="welcome-title">¿A qué jugamos hoy?</h1>
+                
+                <div class="form-group">
+                    <div class="game-input-container">
+                        <input type="text" id="gameName" placeholder="Nombre del juego" class="game-input-large">
+                        <button class="game-next-btn" onclick="goToPlayersScreen()" aria-label="Siguiente">
+                            →
+                        </button>
+                    </div>
+                    <div id="gameNameError" class="error"></div>
+                </div>
             </div>
+        </div>
 
+        <!-- Pantalla 2: Jugadores -->
+        <div id="playersScreen" class="screen">
+            <h1>🎲 <span id="gameNameTitle"></span></h1>
+            
             <div class="form-group">
                 <label>Jugadores:</label>
                 <div id="playersContainer">
@@ -610,7 +895,7 @@
             </div>
         </div>
 
-        <!-- Pantalla 2: Elección de temporizador -->
+        <!-- Pantalla 3: Elección de temporizador -->
         <div id="timerChoiceScreen" class="screen">
             <h1>⏱️ ¿Usar Temporizador?</h1>
             
@@ -786,6 +1071,10 @@
             </div>
         </div>
     </div>
+    
+    <div class="footer-credit footer-outside">
+        Un proyecto de <strong>Álvaro Iregui</strong>
+    </div>
 
     <script>
         let gameData = {
@@ -842,9 +1131,47 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
+            
+            // Ocultar footer en pantallas de temporizador
+            const footer = document.querySelector('.footer-credit.footer-outside');
+            if (footer) {
+                if (screenId === 'timerScreen' || screenId === 'orderPlayersScreen') {
+                    footer.style.display = 'none';
+                } else {
+                    footer.style.display = 'block';
+                }
+            }
         }
 
         // Pantalla 1: Setup
+        // Avanzar al presionar Enter
+        document.getElementById('gameName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.value.trim().length > 0) {
+                goToPlayersScreen();
+            }
+        });
+
+        function goToPlayersScreen() {
+            const gameName = document.getElementById('gameName').value.trim();
+            
+            if (!gameName) {
+                document.getElementById('gameNameError').textContent = 'Por favor, ingresa el nombre del juego';
+                return;
+            }
+            
+            gameData.gameName = gameName;
+            document.getElementById('gameNameTitle').textContent = gameName;
+            document.getElementById('gameNameError').textContent = '';
+            
+            showScreen('playersScreen');
+            
+            // Enfocar el primer input de jugador
+            setTimeout(() => {
+                const firstInput = document.querySelector('.player-name');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+
         function addPlayerInput() {
             const container = document.getElementById('playersContainer');
             const playerNum = container.children.length + 1;
@@ -880,7 +1207,7 @@
         }
 
         function startGame() {
-            const gameName = document.getElementById('gameName').value.trim();
+            // El nombre del juego ya está guardado en gameData.gameName desde goToPlayersScreen
             const playerRows = document.querySelectorAll('.player-input-row');
             
             const players = [];
@@ -895,32 +1222,20 @@
                 }
             });
 
-            // Validación
-            let hasError = false;
-            
-            if (!gameName) {
-                document.getElementById('gameNameError').textContent = 'Por favor, ingresa el nombre del juego';
-                hasError = true;
-            } else {
-                document.getElementById('gameNameError').textContent = '';
-            }
-
+            // Validación solo de jugadores
             if (players.length < 2) {
                 document.getElementById('playersError').textContent = 'Necesitas al menos 2 jugadores';
-                hasError = true;
+                return;
             } else {
                 document.getElementById('playersError').textContent = '';
             }
 
-            if (hasError) return;
-
-            // Guardar datos
-            gameData.gameName = gameName;
+            // Guardar datos de jugadores
             gameData.players = players;
             gameData.playerColors = colors;
 
             // Mostrar información
-            document.getElementById('gameDisplay').textContent = gameName;
+            document.getElementById('gameDisplay').textContent = gameData.gameName;
             document.getElementById('playersDisplay').textContent = players.join(', ');
 
             showScreen('timerChoiceScreen');
@@ -1764,6 +2079,7 @@
             
             // Reiniciar formularios
             document.getElementById('gameName').value = '';
+            document.getElementById('gameNameError').textContent = '';
             document.getElementById('playersContainer').innerHTML = `
                 <div class="player-input-row">
                     <input type="text" placeholder="Nombre del jugador 1" class="player-name">
@@ -1791,6 +2107,34 @@
             
             showScreen('setupScreen');
         }
+
+        // Función para cambiar tema
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            body.classList.toggle('dark-theme');
+            
+            // Cambiar icono
+            if (body.classList.contains('dark-theme')) {
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Cargar tema guardado al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeIcon.textContent = '☀️';
+            }
+        });
     </script>
 </body>
 </html>
