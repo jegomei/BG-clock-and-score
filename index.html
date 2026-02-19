@@ -197,6 +197,17 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
+        body.dark-theme .game-input-large {
+            background: rgba(30, 30, 50, 0.95);
+            color: #e0e0e0;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme .game-input-large:focus {
+            background: rgba(30, 30, 50, 0.95);
+            color: #e0e0e0;
+        }
+
         .game-next-btn {
             width: 60px;
             height: 60px;
@@ -472,6 +483,15 @@
             z-index: 5;
             font-weight: 600;
             min-width: 80px;
+        }
+
+        .score-table .total-row td {
+            background: var(--table-total-bg) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .score-table .total-row td:first-child {
+            background: var(--table-total-bg) !important;
         }
 
         .score-table th:first-child {
@@ -990,6 +1010,10 @@
                     <input type="radio" name="scoringType" value="rounds_with_items" id="roundsWithItemsRadio">
                     <label for="roundsWithItemsRadio">Rondas con ítems (múltiples categorías por ronda)</label>
                 </div>
+                <div class="checkbox-label">
+                    <input type="radio" name="scoringType" value="target_score" id="targetScoreRadio">
+                    <label for="targetScoreRadio">Hasta alcanzar una puntuación objetivo</label>
+                </div>
             </div>
 
             <div id="roundsConfig" class="form-group">
@@ -1042,6 +1066,11 @@
                     </div>
                 </div>
                 <button class="add-player-btn" onclick="addRoundItemInput()">+ Añadir Ítem</button>
+            </div>
+
+            <div id="targetScoreConfig" class="form-group" style="display: none;">
+                <label for="targetScore">Puntuación para ganar:</label>
+                <input type="number" id="targetScore" value="40" min="1" max="9999">
             </div>
 
             <div class="button-group">
@@ -1097,6 +1126,7 @@
             scoringType: 'rounds',
             roundScoringMode: 'all_at_end',
             numRounds: 5,
+            targetScore: 40,
             currentRound: 1,
             roundScores: [],
             items: [],
@@ -1424,10 +1454,20 @@
             // Restaurar el fondo del body al salir del temporizador
             document.body.style.background = '';
 
-            // Si ya estamos en modo ronda a ronda activo, ir directo a la ronda pendiente
-            if (gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round' && gameData.roundScores.length > 0) {
+            // Si ya estamos en modo ronda a ronda activo o target_score, ir directo a la ronda pendiente
+            const isActiveRoundMode = gameData.roundScores.length > 0 && (
+                (gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') ||
+                gameData.scoringType === 'target_score'
+            );
+
+            if (isActiveRoundMode) {
                 document.getElementById('gameDisplayFinal').textContent = gameData.gameName;
-                createRoundByRoundTable(document.getElementById('scoringTableContainer'));
+                const container = document.getElementById('scoringTableContainer');
+                if (gameData.scoringType === 'target_score') {
+                    createTargetScoreTable(container);
+                } else {
+                    createRoundByRoundTable(container);
+                }
                 showScreen('scoringScreen');
             } else {
                 document.getElementById('btnVolverTimer').style.display = 'inline-block';
@@ -1464,18 +1504,28 @@
             document.getElementById('roundsConfig').style.display = 'block';
             document.getElementById('itemsConfig').style.display = 'none';
             document.getElementById('roundsWithItemsConfig').style.display = 'none';
+            document.getElementById('targetScoreConfig').style.display = 'none';
         });
 
         document.getElementById('itemsRadio').addEventListener('change', function() {
             document.getElementById('roundsConfig').style.display = 'none';
             document.getElementById('itemsConfig').style.display = 'block';
             document.getElementById('roundsWithItemsConfig').style.display = 'none';
+            document.getElementById('targetScoreConfig').style.display = 'none';
         });
 
         document.getElementById('roundsWithItemsRadio').addEventListener('change', function() {
             document.getElementById('roundsConfig').style.display = 'none';
             document.getElementById('itemsConfig').style.display = 'none';
             document.getElementById('roundsWithItemsConfig').style.display = 'block';
+            document.getElementById('targetScoreConfig').style.display = 'none';
+        });
+
+        document.getElementById('targetScoreRadio').addEventListener('change', function() {
+            document.getElementById('roundsConfig').style.display = 'none';
+            document.getElementById('itemsConfig').style.display = 'none';
+            document.getElementById('roundsWithItemsConfig').style.display = 'none';
+            document.getElementById('targetScoreConfig').style.display = 'block';
         });
 
         function addRoundItemInput() {
@@ -1581,6 +1631,17 @@
                 }
                 
                 createRoundWithItemsTable(container);
+
+            } else if (gameData.scoringType === 'target_score') {
+                gameData.targetScore = parseInt(document.getElementById('targetScore').value);
+                gameData.roundScoringMode = 'round_by_round';
+
+                if (gameData.roundScores.length === 0) {
+                    gameData.roundScores = gameData.players.map(() => []);
+                    gameData.currentRound = 1;
+                }
+
+                createTargetScoreTable(container);
             }
             
             showScreen('scoringScreen');
@@ -1602,7 +1663,7 @@
                 table += '</tr>';
             });
             
-            table += '<tr style="background: #f0f0f0;"><td><strong>TOTAL</strong></td>';
+            table += '<tr class="total-row"><td><strong>TOTAL</strong></td>';
             gameData.players.forEach((player, playerIndex) => {
                 table += `<td><strong id="total-${playerIndex}">0</strong></td>`;
             });
@@ -1629,7 +1690,7 @@
                 html += '</tr>';
             }
             
-            html += '<tr style="background: #f0f0f0;"><td><strong>TOTAL</strong></td>';
+            html += '<tr class="total-row"><td><strong>TOTAL</strong></td>';
             gameData.players.forEach((player, playerIndex) => {
                 html += `<td><strong id="total-${playerIndex}">0</strong></td>`;
             });
@@ -1669,7 +1730,7 @@
             
             html += `
                         </tr>
-                        <tr style="background: #f0f0f0;">
+                        <tr class="total-row">
                             <td><strong>Total</strong></td>
             `;
             
@@ -1746,6 +1807,90 @@
             calculateRoundByRoundResults();
         }
 
+        function createTargetScoreTable(container) {
+            // Calcular totales actuales
+            const totals = gameData.players.map((player, playerIndex) =>
+                gameData.roundScores[playerIndex].reduce((sum, s) => sum + s, 0)
+            );
+
+            // Comprobar si alguien ya ha ganado
+            const winnerIndex = totals.findIndex(t => t >= gameData.targetScore);
+
+            let html = `
+                <div class="round-header">
+                    <h2>Ronda ${gameData.currentRound} · Meta: ${gameData.targetScore} pts</h2>
+                </div>
+                <div class="table-wrapper">
+                <table class="score-table">
+                    <thead>
+                        <tr><th></th>
+            `;
+
+            gameData.players.forEach(player => {
+                html += `<th>${player}</th>`;
+            });
+
+            html += `</tr></thead><tbody><tr><td><strong>Puntos ronda</strong></td>`;
+
+            gameData.players.forEach((player, playerIndex) => {
+                html += `<td><input type="number" value="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
+            });
+
+            html += `</tr><tr class="total-row"><td><strong>Total</strong></td>`;
+
+            gameData.players.forEach((player, playerIndex) => {
+                const color = totals[playerIndex] >= gameData.targetScore ? '#2ecc71' : '';
+                html += `<td><strong${color ? ` style="color:${color}"` : ''}>${totals[playerIndex]}</strong></td>`;
+            });
+
+            html += `</tr></tbody></table></div>`;
+
+            container.innerHTML = html;
+
+            const continueBtn = document.querySelector('#scoringScreen .button-group button:first-child');
+            const timerBtn = document.getElementById('btnVolverTimerScoring');
+
+            if (winnerIndex !== -1) {
+                // Alguien ya ganó, solo mostrar calcular
+                continueBtn.textContent = 'Ver Resultados';
+                continueBtn.onclick = saveTargetRoundAndFinish;
+                if (timerBtn) timerBtn.style.display = 'none';
+            } else {
+                continueBtn.textContent = 'Guardar Ronda →';
+                continueBtn.onclick = saveTargetRoundAndContinue;
+                if (timerBtn) timerBtn.style.display = gameData.usedTimer ? 'inline-block' : 'none';
+            }
+        }
+
+        function saveTargetRoundAndContinue() {
+            gameData.players.forEach((player, playerIndex) => {
+                const score = parseInt(document.getElementById(`round-score-${playerIndex}`).value) || 0;
+                gameData.roundScores[playerIndex].push(score);
+            });
+
+            // Comprobar si alguien alcanzó el objetivo tras guardar
+            const totals = gameData.players.map((p, i) =>
+                gameData.roundScores[i].reduce((sum, s) => sum + s, 0)
+            );
+            const someoneWon = totals.some(t => t >= gameData.targetScore);
+
+            gameData.currentRound++;
+
+            if (someoneWon) {
+                calculateRoundByRoundResults();
+            } else if (gameData.usedTimer) {
+                returnToTimerFromScoring();
+            } else {
+                createTargetScoreTable(document.getElementById('scoringTableContainer'));
+            }
+        }
+
+        function saveTargetRoundAndFinish() {
+            // La puntuación ya estaba guardada antes de que apareciera el botón "Ver Resultados"
+            // Solo calculamos resultados
+            calculateRoundByRoundResults();
+        }
+
         function calculateRoundByRoundResults() {
             const results = gameData.players.map((player, index) => ({
                 player: player,
@@ -1798,13 +1943,13 @@
                 html += '</tr>';
             });
             
-            html += '<tr style="background: #e3f2fd;"><td><strong>Total Ronda</strong></td>';
+            html += '<tr class="total-row"><td><strong>Total Ronda</strong></td>';
             gameData.players.forEach((player, playerIndex) => {
                 html += `<td><strong id="round-total-${playerIndex}">0</strong></td>`;
             });
             html += '</tr>';
             
-            html += '<tr style="background: #f0f0f0;"><td><strong>Total Acumulado</strong></td>';
+            html += '<tr class="total-row"><td><strong>Total Acumulado</strong></td>';
             gameData.players.forEach((player, playerIndex) => {
                 const accumulated = calculateAccumulatedTotal(playerIndex);
                 html += `<td><strong>${accumulated}</strong></td>`;
@@ -1961,7 +2106,8 @@
         function shareResults() {
             let results;
             
-            if (gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') {
+            if ((gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') ||
+                gameData.scoringType === 'target_score') {
                 results = gameData.players.map((player, index) => ({
                     player: player,
                     score: gameData.roundScores[index].reduce((sum, score) => sum + score, 0)
@@ -2074,6 +2220,7 @@
                 scoringType: 'rounds',
                 roundScoringMode: 'all_at_end',
                 numRounds: 5,
+                targetScore: 40,
                 currentRound: 1,
                 roundScores: [],
                 items: [],
