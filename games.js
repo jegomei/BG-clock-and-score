@@ -8,6 +8,7 @@
  *
  *   name          (string)   Nombre del juego que aparece en el selector
  *   emoji         (string)   Emoji decorativo (opcional)
+ *   maxPlayers    (number)   Número máximo de jugadores (opcional, sin límite si se omite)
  *   scoringType   (string)   Tipo de puntuación:
  *                              'rounds'            → rondas simples
  *                              'items'             → ítems al final
@@ -31,14 +32,16 @@
 
 const GAME_TEMPLATES = [
     {
-        name: "Catán",
-        emoji: "🏝️",
+        name: "Océanos de papel",
+        emoji: "🐙",
+        maxPlayers: 4,
         scoringType: "target_score",
-        targetScore: 10
+        targetScore: 40
     },
     {
         name: "Ticket to Ride",
         emoji: "🚂",
+        maxPlayers: 5,
         scoringType: "items",
         items: [
             { name: "Rutas", negative: false },
@@ -50,6 +53,7 @@ const GAME_TEMPLATES = [
     {
         name: "Carcassonne",
         emoji: "🏰",
+        maxPlayers: 5,
         scoringType: "rounds_with_items",
         numRounds: 1,
         roundItems: [
@@ -62,6 +66,7 @@ const GAME_TEMPLATES = [
     {
         name: "Dominion",
         emoji: "👑",
+        maxPlayers: 4,
         scoringType: "items",
         items: [
             { name: "Provincias", negative: false },
@@ -74,6 +79,7 @@ const GAME_TEMPLATES = [
     {
         name: "7 Wonders",
         emoji: "🏛️",
+        maxPlayers: 7,
         scoringType: "items",
         items: [
             { name: "Militar", negative: false },
@@ -88,6 +94,7 @@ const GAME_TEMPLATES = [
     {
         name: "Pandemia",
         emoji: "🦠",
+        maxPlayers: 4,
         scoringType: "rounds",
         numRounds: 5,
         roundScoringMode: "round_by_round"
@@ -95,6 +102,7 @@ const GAME_TEMPLATES = [
     {
         name: "Agrícola",
         emoji: "🌾",
+        maxPlayers: 5,
         scoringType: "items",
         items: [
             { name: "Campos", negative: false },
