@@ -1031,7 +1031,7 @@
 
             <div class="form-group">
                 <div class="checkbox-label">
-                    <input type="checkbox" id="reorderEachRound">
+                    <input type="checkbox" id="reorderEachRound" checked>
                     <label for="reorderEachRound">Reordenar jugadores cada ronda</label>
                 </div>
             </div>
@@ -1234,7 +1234,8 @@
             playerColors: [],
             timePerPlayer: 60,
             timerMode: 'per_turn',
-            reorderEachRound: false,
+            reorderEachRound: true,
+            hasTemplate: false,
             scoringType: 'rounds',
             roundScoringMode: 'all_at_end',
             numRounds: 5,
@@ -1335,6 +1336,7 @@
         }
 
         function applyTemplate(tpl) {
+            gameData.hasTemplate      = true;
             gameData.scoringType       = tpl.scoringType;
             gameData.roundScoringMode  = tpl.roundScoringMode  || 'all_at_end';
             gameData.numRounds         = tpl.numRounds         || 5;
@@ -1721,6 +1723,10 @@
                     createRoundByRoundTable(container);
                 }
                 showScreen('scoringScreen');
+            } else if (gameData.hasTemplate) {
+                // Hay plantilla aplicada, saltar configuración
+                document.getElementById('btnVolverTimer').style.display = 'inline-block';
+                goToScoringScreenWithTemplate();
             } else {
                 document.getElementById('btnVolverTimer').style.display = 'inline-block';
                 document.getElementById('gameDisplayScoring').textContent = gameData.gameName;
@@ -1743,8 +1749,12 @@
 
         function skipToScoring() {
             document.getElementById('btnVolverTimer').style.display = 'inline-block';
-            document.getElementById('gameDisplayScoring').textContent = gameData.gameName;
-            showScreen('scoringSetupScreen');
+            if (gameData.hasTemplate) {
+                goToScoringScreenWithTemplate();
+            } else {
+                document.getElementById('gameDisplayScoring').textContent = gameData.gameName;
+                showScreen('scoringSetupScreen');
+            }
         }
 
         function goToScoring() {
@@ -1915,7 +1925,7 @@
             gameData.items.forEach((item, itemIndex) => {
                 table += `<tr><td><strong>${item.name}${item.negative ? ' (-)' : ''}</strong></td>`;
                 gameData.players.forEach((player, playerIndex) => {
-                    table += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="score-${playerIndex}-${itemIndex}" onchange="updateTotalItems(${playerIndex})"></td>`;
+                    table += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="score-${playerIndex}-${itemIndex}" onchange="updateTotalItems(${playerIndex})"></td>`;
                 });
                 table += '</tr>';
             });
@@ -1942,7 +1952,7 @@
             for (let round = 0; round < gameData.numRounds; round++) {
                 html += `<tr><td><strong>R${round + 1}</strong></td>`;
                 gameData.players.forEach((player, playerIndex) => {
-                    html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="score-${playerIndex}-${round}" onchange="updateTotal(${playerIndex})"></td>`;
+                    html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="score-${playerIndex}-${round}" onchange="updateTotal(${playerIndex})"></td>`;
                 });
                 html += '</tr>';
             }
@@ -1982,7 +1992,7 @@
             `;
             
             gameData.players.forEach((player, playerIndex) => {
-                html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
+                html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
             });
             
             html += `
@@ -2097,7 +2107,7 @@
             html += `</tr></thead><tbody><tr><td><strong>Puntos ronda</strong></td>`;
 
             gameData.players.forEach((player, playerIndex) => {
-                html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
+                html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
             });
 
             html += `</tr><tr class="total-row"><td><strong>Total</strong></td>`;
@@ -2202,7 +2212,7 @@
             gameData.roundItems.forEach((item, itemIndex) => {
                 html += `<tr><td><strong>${item.name}${item.negative ? ' (-)' : ''}</strong></td>`;
                 gameData.players.forEach((player, playerIndex) => {
-                    html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" value="0" id="round-item-${playerIndex}-${itemIndex}" style="width: 100%;"></td>`;
+                    html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-item-${playerIndex}-${itemIndex}" style="width: 100%;"></td>`;
                 });
                 html += '</tr>';
             });
@@ -2481,7 +2491,8 @@
                 playerColors: [],
                 timePerPlayer: 60,
                 timerMode: 'per_turn',
-                reorderEachRound: false,
+                reorderEachRound: true,
+                hasTemplate: false,
                 scoringType: 'rounds',
                 roundScoringMode: 'all_at_end',
                 numRounds: 5,
@@ -2510,7 +2521,7 @@
             
             document.getElementById('gameName').value = '';
             document.getElementById('gameNameError').textContent = '';
-            document.getElementById('reorderEachRound').checked = false;
+            document.getElementById('reorderEachRound').checked = true;
             document.getElementById('templateSelect').value = '';
             document.getElementById('playersContainer').innerHTML = `
                 <div class="player-input-row">
