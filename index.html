@@ -915,6 +915,12 @@
                     </div>
                     <div id="gameNameError" class="error"></div>
                 </div>
+
+                <div id="templateSection" style="width: 100%; max-width: 500px; margin-top: -4px;">
+                    <select id="templateSelect" class="game-input-large" style="width: 100%; -webkit-appearance: none; appearance: none;">
+                        <option value="">📚 Biblioteca de juegos</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -944,6 +950,7 @@
                 <button onclick="startGame('timer')">⏱️ Usar Temporizador</button>
                 <button class="secondary" onclick="startGame('scoring')">📊 Anotar Puntuación</button>
             </div>
+
         </div>
 
         <!-- Pantalla 3: Elección de temporizador -->
@@ -1175,6 +1182,7 @@
         Un proyecto de <strong>Álvaro Iregui</strong>
     </div>
 
+    <script src="games.js"></script>
     <script>
         let gameData = {
             gameName: '',
@@ -1277,6 +1285,15 @@
             }, 100);
         }
 
+        function applyTemplate(tpl) {
+            gameData.scoringType       = tpl.scoringType;
+            gameData.roundScoringMode  = tpl.roundScoringMode  || 'all_at_end';
+            gameData.numRounds         = tpl.numRounds         || 5;
+            gameData.targetScore       = tpl.targetScore       || 40;
+            gameData.items             = (tpl.items            || []).map(i => ({ ...i }));
+            gameData.roundItems        = (tpl.roundItems       || []).map(i => ({ ...i }));
+        }
+
         function addPlayerInput() {
             const container = document.getElementById('playersContainer');
             const playerNum = container.children.length + 1;
@@ -1336,16 +1353,57 @@
             gameData.players = players;
             gameData.playerColors = colors;
 
+            // Aplicar plantilla si hay una seleccionada
+            const templateSelect = document.getElementById('templateSelect');
+            const templateIndex = templateSelect.value;
+            const hasTemplate = templateIndex !== '' && typeof GAME_TEMPLATES !== 'undefined';
+            if (hasTemplate) {
+                applyTemplate(GAME_TEMPLATES[parseInt(templateIndex)]);
+            }
+
             if (destination === 'scoring') {
                 gameData.usedTimer = false;
                 document.getElementById('btnVolverTimer').style.display = 'none';
-                document.getElementById('gameDisplayScoring').textContent = gameData.gameName;
-                showScreen('scoringSetupScreen');
+                if (hasTemplate) {
+                    // Saltar configuración e ir directo a la tabla de puntuación
+                    goToScoringScreenWithTemplate();
+                } else {
+                    document.getElementById('gameDisplayScoring').textContent = gameData.gameName;
+                    showScreen('scoringSetupScreen');
+                }
             } else {
                 document.getElementById('gameDisplay').textContent = gameData.gameName;
                 document.getElementById('playersDisplay').textContent = players.join(', ');
                 showScreen('timerChoiceScreen');
             }
+        }
+
+        function goToScoringScreenWithTemplate() {
+            document.getElementById('gameDisplayFinal').textContent = gameData.gameName;
+            const container = document.getElementById('scoringTableContainer');
+
+            if (gameData.scoringType === 'rounds') {
+                gameData.roundScores = gameData.players.map(() => []);
+                gameData.currentRound = 1;
+                if (gameData.roundScoringMode === 'round_by_round') {
+                    createRoundByRoundTable(container);
+                } else {
+                    createAllRoundsTable(container);
+                }
+            } else if (gameData.scoringType === 'items') {
+                createItemsTable(container);
+            } else if (gameData.scoringType === 'rounds_with_items') {
+                gameData.roundItemScores = gameData.players.map(() => []);
+                gameData.currentRound = 1;
+                createRoundWithItemsTable(container);
+            } else if (gameData.scoringType === 'target_score') {
+                gameData.roundScoringMode = 'round_by_round';
+                gameData.roundScores = gameData.players.map(() => []);
+                gameData.currentRound = 1;
+                createTargetScoreTable(container);
+            }
+
+            showScreen('scoringScreen');
         }
 
         function startTimer() {
@@ -2347,6 +2405,7 @@
             document.getElementById('gameName').value = '';
             document.getElementById('gameNameError').textContent = '';
             document.getElementById('reorderEachRound').checked = false;
+            document.getElementById('templateSelect').value = '';
             document.getElementById('playersContainer').innerHTML = `
                 <div class="player-input-row">
                     <input type="text" placeholder="Nombre del jugador 1" class="player-name">
@@ -2401,6 +2460,26 @@
                 document.body.classList.add('dark-theme');
                 themeIcon.innerHTML = SVG_SUN;
             }
+
+            // Poblar la Biblioteca con las plantillas de games.js
+            const select = document.getElementById('templateSelect');
+            if (typeof GAME_TEMPLATES !== 'undefined' && GAME_TEMPLATES.length > 0) {
+                GAME_TEMPLATES.forEach((tpl, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = `${tpl.emoji || '🎲'} ${tpl.name}`;
+                    select.appendChild(opt);
+                });
+            }
+
+            // Al seleccionar un juego de la biblioteca, rellenar el nombre automáticamente
+            select.addEventListener('change', function() {
+                if (this.value !== '') {
+                    const tpl = GAME_TEMPLATES[parseInt(this.value)];
+                    document.getElementById('gameName').value = tpl.name;
+                    document.getElementById('gameNameError').textContent = '';
+                }
+            });
         });
     </script>
 </body>
