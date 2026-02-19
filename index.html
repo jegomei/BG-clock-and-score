@@ -2443,16 +2443,23 @@
             }
             
             results.sort((a, b) => b.score - a.score);
-            
-            let shareText = `🎲 ${gameData.gameName}\n`;
-            shareText += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+            // Emoji e nombre del juego
+            const templateIndex = document.getElementById('templateSelect').value;
+            const tplEmoji = (templateIndex !== '' && typeof GAME_TEMPLATES !== 'undefined')
+                ? (GAME_TEMPLATES[parseInt(templateIndex)].emoji || '🎲')
+                : '🎲';
+
+            let shareText = `${tplEmoji} ${gameData.gameName}\n`;
             
             if (gameData.usedTimer && gameData.gameEndTime) {
                 const totalTime = Math.floor((gameData.gameEndTime - gameData.gameStartTime) / 1000);
                 const minutes = Math.floor(totalTime / 60);
                 const seconds = totalTime % 60;
-                shareText += `⏱️ Tiempo total: ${minutes}m ${seconds}s\n\n`;
+                shareText += `⏱️ ${minutes}m ${seconds}s\n`;
             }
+
+            shareText += '\n';
             
             let fastestPlayer = -1;
             let slowestPlayer = -1;
@@ -2469,7 +2476,6 @@
                 }
             }
             
-            shareText += `📊 RESULTADOS:\n\n`;
             results.forEach((result, index) => {
                 const originalIndex = gameData.players.indexOf(result.player);
                 let playerLine = `${index + 1}. ${result.player}: ${result.score} pts`;
@@ -2484,8 +2490,7 @@
                 shareText += playerLine + '\n';
             });
             
-            shareText += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-            shareText += `Creado con Board Game Tracker 🎯`;
+            shareText += `\nBGTime — https://jegomei.github.io/BGTime/`;
             
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(shareText).then(() => {
