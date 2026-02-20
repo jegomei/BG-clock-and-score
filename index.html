@@ -1375,7 +1375,166 @@
             text-align: center;
         }
 
-        /* ── Settings ── */
+        /* ── Scoring Setup rediseño ── */
+        .scoring-type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .scoring-type-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 18px 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            background: var(--table-row-bg);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            min-height: unset;
+            color: var(--text-primary);
+            font-family: inherit;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .scoring-type-card:active {
+            transform: scale(0.97);
+        }
+
+        .scoring-type-card.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.18);
+        }
+
+        body.dark-theme .scoring-type-card.active {
+            background: linear-gradient(135deg, rgba(123,104,238,0.18) 0%, rgba(147,112,219,0.18) 100%);
+            box-shadow: 0 0 0 3px rgba(123,104,238,0.25);
+        }
+
+        .stc-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .stc-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stc-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .scoring-detail-panel {
+            background: var(--table-row-alt);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            animation: slideInRight 0.22s ease both;
+        }
+
+        .sdp-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .sdp-row label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .sdp-number {
+            width: 90px !important;
+            text-align: center;
+            font-size: 18px !important;
+            font-weight: 700;
+            padding: 8px 10px !important;
+        }
+
+        .sdp-toggle-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sdp-toggle {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--table-row-bg);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-height: unset;
+            font-family: inherit;
+        }
+
+        .sdp-toggle.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+        }
+
+        /* ── Fin Scoring Setup rediseño ── */
+        /* ── Theme switch en settings ── */
+        .settings-theme-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 52px;
+            height: 30px;
+            border-radius: 15px;
+            border: none;
+            background: var(--border-color);
+            cursor: pointer;
+            padding: 0;
+            min-height: unset;
+            flex-shrink: 0;
+            transition: background 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .theme-switch.dark {
+            background: var(--primary-color);
+        }
+
+        .theme-switch-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            transition: transform 0.25s ease;
+            pointer-events: none;
+        }
+
+        .theme-switch.dark .theme-switch-thumb {
+            transform: translateX(22px);
+        }
+
+        /* ── Fin Theme switch ── */
+
         .settings-section {
             background: var(--table-row-alt);
             border-radius: 16px;
@@ -1558,11 +1717,6 @@
                 <path d="M12 8v4l3 3"/>
                 <path d="M3.05 11a9 9 0 1 1 .5 4"/>
                 <path d="M3 16v-5h5"/>
-            </svg>
-        </button>
-        <button id="themeToggle" class="top-bar-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
-            <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
         </button>
         <button id="settingsBtn" class="top-bar-btn" onclick="showSettings()" aria-label="Ajustes">
@@ -1750,49 +1904,50 @@
 
         <!-- Pantalla 4: Configuración de puntuación -->
         <div id="scoringSetupScreen" class="screen">
-            <h1>📊 Configurar Puntuación</h1>
-            
-            <div class="info-box">
-                <p><strong>Juego:</strong> <span id="gameDisplayScoring"></span></p>
+            <h1>📊 <span id="gameDisplayScoring"></span></h1>
+
+            <!-- Radios ocultos — la lógica JS los sigue leyendo -->
+            <input type="radio" name="scoringType" value="rounds"           id="roundsRadio"          checked style="display:none">
+            <input type="radio" name="scoringType" value="items"            id="itemsRadio"            style="display:none">
+            <input type="radio" name="scoringType" value="rounds_with_items" id="roundsWithItemsRadio" style="display:none">
+            <input type="radio" name="scoringType" value="target_score"     id="targetScoreRadio"      style="display:none">
+
+            <!-- Cuadrícula de selección -->
+            <div id="scoringTypeGrid" class="scoring-type-grid">
+                <button class="scoring-type-card active" onclick="selectScoringType('rounds')">
+                    <span class="stc-icon">🔢</span>
+                    <span class="stc-label">Rondas</span>
+                    <span class="stc-sub">Puntos por ronda</span>
+                </button>
+                <button class="scoring-type-card" onclick="selectScoringType('items')">
+                    <span class="stc-icon">📋</span>
+                    <span class="stc-label">Ítems</span>
+                    <span class="stc-sub">Categorías al final</span>
+                </button>
+                <button class="scoring-type-card" onclick="selectScoringType('rounds_with_items')">
+                    <span class="stc-icon">🗂️</span>
+                    <span class="stc-label">Rondas + ítems</span>
+                    <span class="stc-sub">Categorías por ronda</span>
+                </button>
+                <button class="scoring-type-card" onclick="selectScoringType('target_score')">
+                    <span class="stc-icon">🎯</span>
+                    <span class="stc-label">Objetivo</span>
+                    <span class="stc-sub">Hasta X puntos</span>
+                </button>
             </div>
 
-            <div class="form-group">
-                <label>¿Cómo se puntúa el juego?</label>
-                <div class="checkbox-label">
-                    <input type="radio" name="scoringType" value="rounds" id="roundsRadio" checked>
-                    <label for="roundsRadio">Por rondas simples (solo puntos)</label>
+            <!-- Configuración de Rondas -->
+            <div id="roundsConfig" class="scoring-detail-panel">
+                <div class="sdp-row">
+                    <label for="numRounds">Número de rondas</label>
+                    <input type="number" id="numRounds" value="5" min="1" max="20" class="sdp-number">
                 </div>
-                <div class="checkbox-label">
-                    <input type="radio" name="scoringType" value="items" id="itemsRadio">
-                    <label for="itemsRadio">Por ítems al final del juego</label>
-                </div>
-                <div class="checkbox-label">
-                    <input type="radio" name="scoringType" value="rounds_with_items" id="roundsWithItemsRadio">
-                    <label for="roundsWithItemsRadio">Rondas con ítems (múltiples categorías por ronda)</label>
-                </div>
-                <div class="checkbox-label">
-                    <input type="radio" name="scoringType" value="target_score" id="targetScoreRadio">
-                    <label for="targetScoreRadio">Hasta alcanzar una puntuación objetivo</label>
-                </div>
+                <input type="radio" name="roundScoring" value="all_at_end"    id="allAtEndRadio"    style="display:none">
+                <input type="radio" name="roundScoring" value="round_by_round" id="roundByRoundRadio" checked style="display:none">
             </div>
 
-            <div id="roundsConfig" class="form-group">
-                <label for="numRounds">Número de rondas:</label>
-                <input type="number" id="numRounds" value="5" min="1" max="20">
-                
-                <label style="margin-top: 15px;">¿Cuándo anotar las puntuaciones?</label>
-                <div class="checkbox-label">
-                    <input type="radio" name="roundScoring" value="all_at_end" id="allAtEndRadio" checked>
-                    <label for="allAtEndRadio">Todas las rondas al final</label>
-                </div>
-                <div class="checkbox-label">
-                    <input type="radio" name="roundScoring" value="round_by_round" id="roundByRoundRadio">
-                    <label for="roundByRoundRadio">Anotar cada ronda antes de pasar a la siguiente</label>
-                </div>
-            </div>
-
-            <div id="itemsConfig" class="form-group" style="display: none;">
-                <label>Ítems puntuables:</label>
+            <!-- Configuración de Ítems -->
+            <div id="itemsConfig" class="scoring-detail-panel" style="display:none;">
                 <div id="itemsContainer">
                     <div class="scoring-item">
                         <div class="scoring-item-header">
@@ -1808,11 +1963,12 @@
                 <button class="add-player-btn" onclick="addItemInput()">+ Añadir Ítem</button>
             </div>
 
-            <div id="roundsWithItemsConfig" class="form-group" style="display: none;">
-                <label for="numRoundsWithItems">Número de rondas:</label>
-                <input type="number" id="numRoundsWithItems" value="3" min="1" max="10">
-                
-                <label style="margin-top: 15px;">Ítems a puntuar en cada ronda:</label>
+            <!-- Configuración de Rondas con Ítems -->
+            <div id="roundsWithItemsConfig" class="scoring-detail-panel" style="display:none;">
+                <div class="sdp-row">
+                    <label for="numRoundsWithItems">Número de rondas</label>
+                    <input type="number" id="numRoundsWithItems" value="3" min="1" max="10" class="sdp-number">
+                </div>
                 <div id="roundItemsContainer">
                     <div class="scoring-item">
                         <div class="scoring-item-header">
@@ -1828,9 +1984,12 @@
                 <button class="add-player-btn" onclick="addRoundItemInput()">+ Añadir Ítem</button>
             </div>
 
-            <div id="targetScoreConfig" class="form-group" style="display: none;">
-                <label for="targetScore">Puntuación para ganar:</label>
-                <input type="number" id="targetScore" value="40" min="1" max="9999">
+            <!-- Configuración de Puntuación Objetivo -->
+            <div id="targetScoreConfig" class="scoring-detail-panel" style="display:none;">
+                <div class="sdp-row">
+                    <label for="targetScore">Puntos para ganar</label>
+                    <input type="number" id="targetScore" value="40" min="1" max="9999" class="sdp-number">
+                </div>
             </div>
 
             <div class="button-group">
@@ -1897,6 +2056,19 @@
         <!-- Pantalla: Ajustes -->
         <div id="settingsScreen" class="screen">
             <h1>⚙️ Ajustes</h1>
+
+            <!-- Tema -->
+            <div class="settings-section">
+                <div class="settings-theme-row">
+                    <div>
+                        <h2 style="margin-bottom:2px;">🌓 Tema</h2>
+                        <p class="settings-desc" id="themeLabel">Modo claro activo</p>
+                    </div>
+                    <button class="theme-switch" id="themeSwitchBtn" onclick="toggleTheme()" aria-label="Cambiar tema">
+                        <span class="theme-switch-thumb"></span>
+                    </button>
+                </div>
+            </div>
 
             <!-- Jugadores habituales -->
             <div class="settings-section">
@@ -2688,6 +2860,33 @@
         }
 
         // Pantalla 4: Scoring Setup
+        function selectScoringType(type) {
+            // Actualizar radio oculto
+            document.getElementById({
+                rounds: 'roundsRadio',
+                items: 'itemsRadio',
+                rounds_with_items: 'roundsWithItemsRadio',
+                target_score: 'targetScoreRadio'
+            }[type]).checked = true;
+
+            // Actualizar estado visual de los botones
+            document.querySelectorAll('.scoring-type-card').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Mostrar panel correspondiente
+            document.getElementById('roundsConfig').style.display           = type === 'rounds'            ? 'block' : 'none';
+            document.getElementById('itemsConfig').style.display            = type === 'items'             ? 'block' : 'none';
+            document.getElementById('roundsWithItemsConfig').style.display  = type === 'rounds_with_items' ? 'block' : 'none';
+            document.getElementById('targetScoreConfig').style.display      = type === 'target_score'      ? 'block' : 'none';
+        }
+
+        function selectRoundMode(mode) {
+            document.getElementById(mode === 'all_at_end' ? 'allAtEndRadio' : 'roundByRoundRadio').checked = true;
+            document.getElementById('toggleAllAtEnd').classList.toggle('active', mode === 'all_at_end');
+            document.getElementById('toggleRoundByRound').classList.toggle('active', mode === 'round_by_round');
+        }
+
+        // Mantener compatibilidad con listeners de radio por si acaso
         document.getElementById('roundsRadio').addEventListener('change', function() {
             document.getElementById('roundsConfig').style.display = 'block';
             document.getElementById('itemsConfig').style.display = 'none';
@@ -3871,29 +4070,28 @@
             );
         }
 
+        function updateThemeUI() {
+            const isDark = document.body.classList.contains('dark-theme');
+            const btn = document.getElementById('themeSwitchBtn');
+            const label = document.getElementById('themeLabel');
+            if (btn) btn.classList.toggle('dark', isDark);
+            if (label) label.textContent = isDark ? 'Modo oscuro activo' : 'Modo claro activo';
+        }
+
         function toggleTheme() {
-            const body = document.body;
-            const themeIcon = document.getElementById('themeIcon');
-
-            body.classList.toggle('dark-theme');
-
-            if (body.classList.contains('dark-theme')) {
-                themeIcon.innerHTML = SVG_SUN;
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeIcon.innerHTML = SVG_MOON;
-                localStorage.setItem('theme', 'light');
-            }
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeUI();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme');
-            const themeIcon = document.getElementById('themeIcon');
 
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-theme');
-                themeIcon.innerHTML = SVG_SUN;
             }
+            updateThemeUI();
 
             // Poblar la Biblioteca con las plantillas de games.js + plantillas propias
             rebuildLibrary();
