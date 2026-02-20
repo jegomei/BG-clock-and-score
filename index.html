@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
     <title>Tracker de Juegos de Mesa</title>
     <style>
         html {
@@ -18,7 +19,11 @@
             box-sizing: border-box;
         }
 
-        
+        @supports (height: 100dvh) {
+          body {
+            min-height: 100dvh;
+          }
+        }
 
         :root {
             --bg-gradient-start: #324bbd;
@@ -105,20 +110,26 @@
                     drop-shadow(0 0 12px rgba(180,160,255,0.7));
             opacity: 1;
         }
-
+        
+        html, body {
+            height: 100%;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            min-height: 100vh;
+            min-height: 100svh;
             min-height: 100dvh;
+            min-height: 100vh;
             background-attachment: fixed;
+            background-repeat: no-repeat;
+            overscroll-behavior: none;
             padding: 4px 10px 10px 10px;
-            padding-top: max(4px, env(safe-area-inset-top));
+            padding-top: max(10px, env(safe-area-inset-top));
             padding-bottom: max(10px, env(safe-area-inset-bottom));
             padding-left: max(10px, env(safe-area-inset-left));
             padding-right: max(10px, env(safe-area-inset-right));
             -webkit-text-size-adjust: 100%;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease;        
         }
 
         .container {
