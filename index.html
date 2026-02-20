@@ -1103,7 +1103,6 @@
         }
         .library-search-input {
             width: 100%;
-            padding-left: 48px !important;
             padding-right: 44px !important;
         }
         .library-clear-btn {
@@ -1376,27 +1375,24 @@
                 
                 <h1 class="welcome-title">¿A qué jugamos hoy?</h1>
                 
-                <div class="form-group">
-                    <div class="game-input-container">
-                        <input type="text" id="gameName" placeholder="Nombre del juego" class="game-input-large">
+                <div id="templateSection" style="width: 100%; max-width: 500px; position: relative;">
+                    <!-- Hidden field keeps the numeric index used by the rest of the JS -->
+                    <input type="hidden" id="templateSelect" value="">
+                    <!-- Hidden gameName field for backward compatibility -->
+                    <input type="hidden" id="gameName" value="">
+                    <div class="game-input-container" style="position:relative;">
+                        <div class="library-input-wrap" style="flex:1; max-width: 400px;">
+                            <input type="text" id="librarySearch" class="game-input-large library-search-input"
+                                   placeholder="Nombre del juego"
+                                   autocomplete="off" autocorrect="off" spellcheck="false"
+                                   oninput="filterLibraryAndSync()" onfocus="openLibraryDropdown()" onblur="scheduleCloseLibrary()">
+                            <button class="library-clear-btn" id="libraryClearBtn" onclick="clearLibrarySelection()" style="display:none;" tabindex="-1">✕</button>
+                        </div>
                         <button class="game-next-btn" onclick="goToPlayersScreen()" aria-label="Siguiente">
                             →
                         </button>
                     </div>
                     <div id="gameNameError" class="error"></div>
-                </div>
-
-                <div id="templateSection" style="width: 100%; max-width: 500px; margin-top: -4px; position: relative;">
-                    <!-- Hidden field keeps the numeric index used by the rest of the JS -->
-                    <input type="hidden" id="templateSelect" value="">
-                    <div class="library-input-wrap">
-                        <span class="library-icon">📚</span>
-                        <input type="text" id="librarySearch" class="game-input-large library-search-input"
-                               placeholder="Buscar en la biblioteca…"
-                               autocomplete="off" autocorrect="off" spellcheck="false"
-                               oninput="filterLibrary()" onfocus="openLibraryDropdown()" onblur="scheduleCloseLibrary()">
-                        <button class="library-clear-btn" id="libraryClearBtn" onclick="clearLibrarySelection()" style="display:none;" tabindex="-1">✕</button>
-                    </div>
                     <ul id="libraryDropdown" class="library-dropdown" style="display:none;"></ul>
                 </div>
             </div>
@@ -1923,14 +1919,24 @@
         }
 
         // Pantalla 1: Setup
-        document.getElementById('gameName').addEventListener('keypress', function(e) {
+        document.getElementById('librarySearch').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && e.target.value.trim().length > 0) {
+                scheduleCloseLibrary();
                 goToPlayersScreen();
             }
         });
 
         function goToPlayersScreen() {
-            const gameName = document.getElementById('gameName').value.trim();
+            const rawInput = document.getElementById('librarySearch').value.trim();
+            // If a template is selected, the label includes emoji — extract just the name
+            const templateIndex = document.getElementById('templateSelect').value;
+            let gameName = rawInput;
+            if (templateIndex !== '' && typeof _libraryIndex !== 'undefined') {
+                const entry = _libraryIndex.find(t => t.index == templateIndex);
+                if (entry) gameName = entry.name;
+            }
+            // Sync hidden field
+            document.getElementById('gameName').value = gameName;
             
             if (!gameName) {
                 document.getElementById('gameNameError').textContent = 'Por favor, ingresa el nombre del juego';
@@ -3649,15 +3655,18 @@
                 .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
         }
 
-        function filterLibrary() {
-            const q = normStr(document.getElementById('librarySearch').value.trim());
-            const dropdown = document.getElementById('libraryDropdown');
-
-            // Si el campo está vacío y el hidden tiene valor, el usuario está editando → limpiar selección
+        function filterLibraryAndSync() {
+            // Clear template selection when user types freely
             if (document.getElementById('templateSelect').value !== '') {
                 document.getElementById('templateSelect').value = '';
                 document.getElementById('libraryClearBtn').style.display = 'none';
             }
+            filterLibrary();
+        }
+
+        function filterLibrary() {
+            const q = normStr(document.getElementById('librarySearch').value.trim());
+            const dropdown = document.getElementById('libraryDropdown');
 
             const matches = q === ''
                 ? _libraryIndex
@@ -3705,8 +3714,6 @@
             document.getElementById('librarySearch').value = t.label;
             document.getElementById('libraryClearBtn').style.display = 'flex';
             document.getElementById('libraryDropdown').style.display = 'none';
-            // Rellenar nombre del juego y disparar lógica existente
-            document.getElementById('gameName').value = t.name;
             document.getElementById('gameNameError').textContent = '';
             updateRemoveButtons();
         }
@@ -3734,6 +3741,7 @@
         function clearLibrarySelection() {
             document.getElementById('templateSelect').value = '';
             document.getElementById('librarySearch').value = '';
+            document.getElementById('gameName').value = '';
             document.getElementById('libraryClearBtn').style.display = 'none';
             document.getElementById('libraryDropdown').style.display = 'none';
         }
