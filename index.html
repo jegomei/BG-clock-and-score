@@ -2728,7 +2728,8 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                     <h2 id="historyDetailTitle" style="font-size:18px;color:var(--secondary-color);margin:0;"></h2>
                     <div style="display:flex;gap:8px;align-items:center;">
-                        <button id="historyDetailShareBtn" onclick="shareHistoryEntry()" style="background:var(--btn-primary-gradient);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;min-height:unset;margin:0;" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
+                        <button onclick="deleteHistoryEntry()" style="background:var(--btn-red-gradient);color:white;border:none;border-radius:8px;padding:8px 10px;font-size:14px;cursor:pointer;min-height:unset;margin:0;display:flex;align-items:center;justify-content:center;" title="Borrar partida"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+                        <button id="historyDetailShareBtn" onclick="shareHistoryEntry()" style="background:var(--btn-primary-gradient);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;min-height:unset;margin:0;display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Compartir</button>
                         <button onclick="document.getElementById('historyDetailModal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);min-height:unset;padding:4px 8px;margin:0;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                     </div>
                 </div>
@@ -2913,6 +2914,18 @@
             <div class="confirm-modal-actions">
                 <button class="confirm-modal-cancel" onclick="closeClearHistoryModal()">Cancelar</button>
                 <button class="confirm-modal-ok" onclick="confirmClearHistory()">Sí, borrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmDeleteEntryModal" class="confirm-modal-overlay" style="display:none;" onclick="closeDeleteEntryModal(event)">
+        <div class="confirm-modal-box">
+            <div class="confirm-modal-icon"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+            <p class="confirm-modal-title">¿Borrar esta partida?</p>
+            <p class="confirm-modal-desc" id="deleteEntryDesc">Esta acción no se puede deshacer.</p>
+            <div class="confirm-modal-actions">
+                <button class="confirm-modal-cancel" onclick="closeDeleteEntryModal()">Cancelar</button>
+                <button class="confirm-modal-ok" onclick="confirmDeleteEntry()">Sí, borrar</button>
             </div>
         </div>
     </div>
@@ -4657,7 +4670,7 @@
 
             history.unshift({
                 id: Date.now(),
-                date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' }),
                 gameName: gameData.gameName,
                 emoji: tplEmoji,
                 results: results.map(r => ({ player: r.player, score: r.score })),
@@ -4682,7 +4695,7 @@
 
         let previousScreenId = 'setupScreen';
 
-        function showHistory() {
+        function showHistory(showAll = false) {
             const activeScreen = document.querySelector('.screen.active');
             if (activeScreen && activeScreen.id === 'historyScreen') {
                 showScreen(previousScreenId, -1);
@@ -4691,33 +4704,51 @@
 
             if (activeScreen) previousScreenId = activeScreen.id;
 
+            renderHistoryList(showAll);
+
+            // Mostrar usando showScreen para que tenga animación
+            showScreen('historyScreen', 1);
+        }
+
+        function renderHistoryList(showAll = false) {
             const history = JSON.parse(localStorage.getItem('bgtime_history') || '[]');
             const container = document.getElementById('historyContainer');
             container.innerHTML = '';
 
             if (history.length === 0) {
                 container.innerHTML = '<div class="history-empty">Aún no hay partidas guardadas.<br>¡Juega una partida para verla aquí!</div>';
-            } else {
-                history.forEach(entry => {
-                    const card = document.createElement('div');
-                    card.className = 'history-card';
-                    const playersHtml = entry.results.map((r, i) =>
-                        `<span${i === 0 ? ' class="history-card-winner"' : ''}>${i === 0 ? '<span style="display:inline-flex;align-items:center;margin-right:3px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>' : ''}${r.player}: ${r.score} pts</span>`
-                    ).join(' · ');
-                    card.innerHTML = `
-                        <div class="history-card-header">
-                            <span class="history-card-game">${entry.emoji} ${entry.gameName}</span>
-                            <span class="history-card-date">${entry.date}</span>
-                        </div>
-                        <div class="history-card-players">${playersHtml}</div>
-                    `;
-                    card.addEventListener('click', () => showHistoryDetail(entry));
-                    container.appendChild(card);
-                });
+                return;
             }
 
-            // Mostrar usando showScreen para que tenga animación
-            showScreen('historyScreen', 1);
+            const LIMIT = 5;
+            const visible = showAll ? history : history.slice(0, LIMIT);
+
+            visible.forEach(entry => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                const playersHtml = entry.results.map((r, i) =>
+                    `<span${i === 0 ? ' class="history-card-winner"' : ''}>${i === 0 ? '<span style="display:inline-flex;align-items:center;margin-right:3px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>' : ''}${r.player}: ${r.score} pts</span>`
+                ).join(' · ');
+                card.innerHTML = `
+                    <div class="history-card-header">
+                        <span class="history-card-game">${entry.emoji} ${entry.gameName}</span>
+                        <span class="history-card-date">${entry.date}</span>
+                    </div>
+                    <div class="history-card-players">${playersHtml}</div>
+                `;
+                card.addEventListener('click', () => showHistoryDetail(entry));
+                container.appendChild(card);
+            });
+
+            if (!showAll && history.length > LIMIT) {
+                const remaining = history.length - LIMIT;
+                const btn = document.createElement('button');
+                btn.className = 'secondary';
+                btn.style.cssText = 'width:100%;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;';
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>Ver ${remaining} partida${remaining !== 1 ? 's' : ''} más`;
+                btn.addEventListener('click', () => renderHistoryList(true));
+                container.appendChild(btn);
+            }
         }
 
         function clearHistory() {
@@ -4729,6 +4760,30 @@
         function closeHistoryDetailModal(e) {
             if (e && e.target !== document.getElementById('historyDetailModal')) return;
             document.getElementById('historyDetailModal').style.display = 'none';
+        }
+
+        function deleteHistoryEntry() {
+            const entry = _currentHistoryEntry;
+            if (!entry) return;
+            document.getElementById('deleteEntryDesc').textContent =
+                `${entry.emoji} ${entry.gameName} · ${entry.date}. Esta acción no se puede deshacer.`;
+            document.getElementById('confirmDeleteEntryModal').style.display = 'flex';
+        }
+
+        function closeDeleteEntryModal(e) {
+            if (e && e.target !== document.getElementById('confirmDeleteEntryModal')) return;
+            document.getElementById('confirmDeleteEntryModal').style.display = 'none';
+        }
+
+        function confirmDeleteEntry() {
+            const entry = _currentHistoryEntry;
+            if (!entry) return;
+            const history = JSON.parse(localStorage.getItem('bgtime_history') || '[]');
+            const updated = history.filter(e => e.id !== entry.id);
+            localStorage.setItem('bgtime_history', JSON.stringify(updated));
+            document.getElementById('confirmDeleteEntryModal').style.display = 'none';
+            document.getElementById('historyDetailModal').style.display = 'none';
+            showHistory();
         }
 
         function showHistoryDetail(entry) {
