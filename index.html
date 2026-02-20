@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Tracker de Juegos de Mesa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BGTime: Temporizador y calculadora de puntos para juegos de mesa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1819,10 +1819,10 @@
 
         <!-- Pantalla 2: Jugadores -->
         <div id="playersScreen" class="screen">
-            <h1><span id="gameNameTitle"></span></h1>
+            <h1>Jugadores</h1>
+            <span id="gameNameTitle" style="display:none;"></span>
             
             <div class="form-group">
-                <label>Jugadores:</label>
                 <div id="frecuentPlayersChips" class="frecuent-chips-row" style="display:none;"></div>
                 <div id="playersContainer">
                     <div class="player-input-row">
@@ -1923,7 +1923,6 @@
             <h1>Ordenar Turnos de Jugadores</h1>
             
             <div class="info-box">
-                <p><strong>Juego:</strong> <span id="gameDisplayOrder"></span></p>
                 <p>Arrastra los jugadores para ordenar el turno de juego</p>
             </div>
 
@@ -2102,9 +2101,7 @@
         <div id="scoringScreen" class="screen">
             <h1>Ingresar Puntuaciones</h1>
             
-            <div class="info-box">
-                <p><strong>Juego:</strong> <span id="gameDisplayFinal"></span></p>
-            </div>
+            <span id="gameDisplayFinal" style="display:none;"></span>
 
             <div id="scoringTableContainer"></div>
 
@@ -2253,7 +2250,7 @@
     </div>
     
     <div class="footer-credit footer-outside">
-        Un proyecto de <strong>Álvaro Iregui</strong>
+        <strong>BGTime </strong> Un proyecto de <strong>Álvaro Iregui</strong>
     </div>
 
     <!-- Modal de confirmación para volver al inicio -->
