@@ -968,9 +968,6 @@
 
         .footer-credit a:active {
             opacity: 0.7;
-        }
-
-        .history-empty {
             text-align: center;
             color: var(--text-secondary);
             padding: 40px 0;
@@ -983,6 +980,16 @@
             padding: 14px 16px;
             margin-bottom: 12px;
             border-left: 4px solid var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .history-card:active {
+            transform: scale(0.98);
+        }
+
+        .history-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.13);
         }
 
         .history-card-header {
@@ -1642,6 +1649,20 @@
             <div class="button-group">
                 <button onclick="shareResults()">📤 Compartir Resultados</button>
                 <button onclick="resetGame()">Nueva Partida</button>
+            </div>
+        </div>
+
+        <!-- Modal: Detalle de partida del historial -->
+        <div id="historyDetailModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:16px;" onclick="closeHistoryDetailModal(event)">
+            <div style="background:var(--container-bg);border-radius:16px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.4);padding:20px 16px 24px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <h2 id="historyDetailTitle" style="font-size:18px;color:var(--secondary-color);margin:0;"></h2>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button id="historyDetailShareBtn" onclick="shareHistoryEntry()" style="background:var(--button-bg);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;min-height:unset;margin:0;">📤 Compartir</button>
+                        <button onclick="document.getElementById('historyDetailModal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary);min-height:unset;padding:4px 8px;margin:0;">✕</button>
+                    </div>
+                </div>
+                <div id="historyDetailTable"></div>
             </div>
         </div>
 
@@ -2342,9 +2363,12 @@
             }
 
             // Si ya estamos en modo ronda a ronda activo o target_score, ir directo a la ronda pendiente
-            const isActiveRoundMode = gameData.roundScores.length > 0 && (
-                (gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') ||
-                gameData.scoringType === 'target_score'
+            const isActiveRoundMode = (
+                (gameData.roundScores.length > 0 && (
+                    (gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') ||
+                    gameData.scoringType === 'target_score'
+                )) ||
+                (gameData.scoringType === 'rounds_with_items' && gameData.roundItemScores.length > 0)
             );
 
             if (isActiveRoundMode) {
@@ -2352,6 +2376,8 @@
                 const container = document.getElementById('scoringTableContainer');
                 if (gameData.scoringType === 'target_score') {
                     createTargetScoreTable(container);
+                } else if (gameData.scoringType === 'rounds_with_items') {
+                    createRoundWithItemsTable(container);
                 } else {
                     createRoundByRoundTable(container);
                 }
@@ -2616,35 +2642,32 @@
                 html += `<th>${player}</th>`;
             });
             
-            html += `
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Puntos</strong></td>
-            `;
+            html += `</tr></thead><tbody>`;
+
+            // Filas de rondas anteriores ya guardadas
+            const completedRounds = gameData.currentRound - 1;
+            for (let r = 0; r < completedRounds; r++) {
+                html += `<tr><td><strong style="color:var(--text-secondary)">R${r + 1}</strong></td>`;
+                gameData.players.forEach((player, playerIndex) => {
+                    html += `<td style="color:var(--text-secondary)">${gameData.roundScores[playerIndex][r] ?? 0}</td>`;
+                });
+                html += '</tr>';
+            }
+
+            html += `<tr><td><strong>R${gameData.currentRound}</strong></td>`;
             
             gameData.players.forEach((player, playerIndex) => {
                 html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
             });
             
-            html += `
-                        </tr>
-                        <tr class="total-row">
-                            <td><strong>Total</strong></td>
-            `;
+            html += `</tr><tr class="total-row"><td><strong>Total</strong></td>`;
             
             gameData.players.forEach((player, playerIndex) => {
                 const currentTotal = gameData.roundScores[playerIndex].reduce((sum, score) => sum + score, 0);
                 html += `<td><strong>${currentTotal}</strong></td>`;
             });
             
-            html += `
-                        </tr>
-                    </tbody>
-                </table>
-                </div>
-            `;
+            html += `</tr></tbody></table></div>`;
             
             container.innerHTML = html;
             
@@ -2737,7 +2760,19 @@
                 html += `<th>${player}</th>`;
             });
 
-            html += `</tr></thead><tbody><tr><td><strong>Puntos ronda</strong></td>`;
+            html += `</tr></thead><tbody>`;
+
+            // Filas de rondas anteriores ya guardadas
+            const completedRounds = gameData.currentRound - 1;
+            for (let r = 0; r < completedRounds; r++) {
+                html += `<tr><td><strong style="color:var(--text-secondary)">R${r + 1}</strong></td>`;
+                gameData.players.forEach((player, playerIndex) => {
+                    html += `<td style="color:var(--text-secondary)">${gameData.roundScores[playerIndex][r] ?? 0}</td>`;
+                });
+                html += '</tr>';
+            }
+
+            html += `<tr><td><strong>R${gameData.currentRound}</strong></td>`;
 
             gameData.players.forEach((player, playerIndex) => {
                 html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-score-${playerIndex}" style="width: 100%;"></td>`;
@@ -2824,9 +2859,35 @@
             });
             
             html += `</tr></thead><tbody>`;
+
+            // Filas de rondas anteriores ya guardadas
+            const completedRounds = gameData.currentRound - 1;
+            for (let r = 0; r < completedRounds; r++) {
+                // Mostrar una fila por ítem de rondas anteriores
+                gameData.roundItems.forEach((item, itemIndex) => {
+                    html += `<tr><td style="color:var(--text-secondary)"><em>R${r+1} ${item.name}${item.negative ? ' (-)' : ''}</em></td>`;
+                    gameData.players.forEach((player, playerIndex) => {
+                        const val = gameData.roundItemScores[playerIndex][r]?.[itemIndex] ?? 0;
+                        html += `<td style="color:var(--text-secondary)">${val}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                // Subtotal de esa ronda
+                html += `<tr style="border-top:2px solid var(--border-color)"><td><strong style="color:var(--text-secondary)">Subtotal R${r+1}</strong></td>`;
+                gameData.players.forEach((player, playerIndex) => {
+                    let roundTotal = 0;
+                    gameData.roundItems.forEach((item, itemIndex) => {
+                        const val = gameData.roundItemScores[playerIndex][r]?.[itemIndex] ?? 0;
+                        roundTotal += item.negative ? -val : val;
+                    });
+                    html += `<td><strong style="color:var(--text-secondary)">${roundTotal}</strong></td>`;
+                });
+                html += '</tr>';
+            }
             
             gameData.roundItems.forEach((item, itemIndex) => {
-                html += `<tr><td><strong>${item.name}${item.negative ? ' (-)' : ''}</strong></td>`;
+                const isFirst = itemIndex === 0;
+                html += `<tr${isFirst ? ' style="border-top:2px solid var(--primary-color)"' : ''}><td><strong>${item.name}${item.negative ? ' (-)' : ''}</strong></td>`;
                 gameData.players.forEach((player, playerIndex) => {
                     html += `<td><input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" id="round-item-${playerIndex}-${itemIndex}" style="width: 100%;"></td>`;
                 });
@@ -2858,19 +2919,23 @@
             });
             
             const continueBtn = document.querySelector('#scoringScreen .button-group button:first-child');
+            const timerBtn = document.getElementById('btnVolverTimerScoring');
             if (gameData.currentRound < gameData.numRounds) {
-                continueBtn.textContent = 'Siguiente Ronda →';
+                continueBtn.textContent = gameData.usedTimer ? 'Guardar Ronda →' : 'Siguiente Ronda →';
                 continueBtn.onclick = saveRoundWithItemsAndContinue;
+                if (timerBtn) timerBtn.style.display = gameData.usedTimer ? 'inline-block' : 'none';
             } else {
                 continueBtn.textContent = 'Calcular Resultados';
                 continueBtn.onclick = saveRoundWithItemsAndFinish;
+                if (timerBtn) timerBtn.style.display = 'none';
             }
         }
 
         function updateRoundTotal(playerIndex) {
             let total = 0;
             gameData.roundItems.forEach((item, itemIndex) => {
-                const value = parseInt(document.getElementById(`round-item-${playerIndex}-${itemIndex}`).value) || 0;
+                const el = document.getElementById(`round-item-${playerIndex}-${itemIndex}`);
+                const value = el ? (parseInt(el.value) || 0) : 0;
                 total += item.negative ? -value : value;
             });
             const totalElement = document.getElementById(`round-total-${playerIndex}`);
@@ -2891,29 +2956,17 @@
         }
 
         function saveRoundWithItemsAndContinue() {
-            gameData.players.forEach((player, playerIndex) => {
-                const roundScores = [];
-                gameData.roundItems.forEach((item, itemIndex) => {
-                    const score = parseInt(document.getElementById(`round-item-${playerIndex}-${itemIndex}`).value) || 0;
-                    roundScores.push(score);
-                });
-                gameData.roundItemScores[playerIndex].push(roundScores);
-            });
-            
+            _saveCurrentRoundWithItemsIfNeeded();
             gameData.currentRound++;
-            createRoundWithItemsTable(document.getElementById('scoringTableContainer'));
+            if (gameData.usedTimer) {
+                returnToTimerFromScoring();
+            } else {
+                createRoundWithItemsTable(document.getElementById('scoringTableContainer'));
+            }
         }
 
         function saveRoundWithItemsAndFinish() {
-            gameData.players.forEach((player, playerIndex) => {
-                const roundScores = [];
-                gameData.roundItems.forEach((item, itemIndex) => {
-                    const score = parseInt(document.getElementById(`round-item-${playerIndex}-${itemIndex}`).value) || 0;
-                    roundScores.push(score);
-                });
-                gameData.roundItemScores[playerIndex].push(roundScores);
-            });
-            
+            _saveCurrentRoundWithItemsIfNeeded();
             calculateRoundWithItemsResults();
         }
 
@@ -2978,12 +3031,65 @@
         }
 
         function calculateResults() {
+            if (gameData.scoringType === 'rounds_with_items') {
+                // Guardar los valores actuales del DOM si existen, luego calcular
+                _saveCurrentRoundWithItemsIfNeeded();
+                calculateRoundWithItemsResults();
+                return;
+            }
+            if ((gameData.scoringType === 'rounds' && gameData.roundScoringMode === 'round_by_round') ||
+                gameData.scoringType === 'target_score') {
+                _saveCurrentRoundIfNeeded();
+                calculateRoundByRoundResults();
+                return;
+            }
+            // items o rounds all_at_end: leer valores del DOM y guardar en gameData
+            if (gameData.scoringType === 'items') {
+                gameData.itemScores = gameData.players.map((player, playerIndex) =>
+                    gameData.items.map((item, itemIndex) => {
+                        const el = document.getElementById(`score-${playerIndex}-${itemIndex}`);
+                        return el ? (parseInt(el.value) || 0) : 0;
+                    })
+                );
+            } else if (gameData.scoringType === 'rounds') {
+                // all_at_end: guardar scores de rondas
+                gameData.roundScores = gameData.players.map((player, playerIndex) =>
+                    Array.from({ length: gameData.numRounds }, (_, round) => {
+                        const el = document.getElementById(`score-${playerIndex}-${round}`);
+                        return el ? (parseInt(el.value) || 0) : 0;
+                    })
+                );
+            }
             const results = gameData.players.map((player, index) => ({
                 player: player,
-                score: parseInt(document.getElementById(`total-${index}`).textContent)
+                score: parseInt(document.getElementById(`total-${index}`)?.textContent) || 0
             }));
             
             showFinalResults(results);
+        }
+
+        function _saveCurrentRoundWithItemsIfNeeded() {
+            // Solo guardar si el número de rondas guardadas es menor que currentRound
+            const alreadySaved = gameData.roundItemScores[0]?.length >= gameData.currentRound;
+            if (alreadySaved) return;
+            gameData.players.forEach((player, playerIndex) => {
+                const roundScores = [];
+                gameData.roundItems.forEach((item, itemIndex) => {
+                    const el = document.getElementById(`round-item-${playerIndex}-${itemIndex}`);
+                    roundScores.push(el ? (parseInt(el.value) || 0) : 0);
+                });
+                gameData.roundItemScores[playerIndex].push(roundScores);
+            });
+        }
+
+        function _saveCurrentRoundIfNeeded() {
+            const alreadySaved = gameData.roundScores[0]?.length >= gameData.currentRound;
+            if (alreadySaved) return;
+            gameData.players.forEach((player, playerIndex) => {
+                const el = document.getElementById(`round-score-${playerIndex}`);
+                const score = el ? (parseInt(el.value) || 0) : 0;
+                gameData.roundScores[playerIndex].push(score);
+            });
         }
 
         function shareResults() {
@@ -3204,7 +3310,17 @@
                 date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
                 gameName: gameData.gameName,
                 emoji: tplEmoji,
-                results: results.map(r => ({ player: r.player, score: r.score }))
+                results: results.map(r => ({ player: r.player, score: r.score })),
+                scoringType: gameData.scoringType,
+                roundScoringMode: gameData.roundScoringMode,
+                players: [...gameData.players],
+                numRounds: gameData.numRounds,
+                targetScore: gameData.targetScore,
+                roundScores: gameData.roundScores ? gameData.roundScores.map(r => [...r]) : [],
+                items: gameData.items ? [...gameData.items] : [],
+                itemScores: gameData.itemScores ? gameData.itemScores.map(r => [...r]) : [],
+                roundItems: gameData.roundItems ? [...gameData.roundItems] : [],
+                roundItemScores: gameData.roundItemScores ? gameData.roundItemScores.map(r => r.map(rr => [...rr])) : []
             });
 
             // Guardar máximo 50 partidas
@@ -3242,6 +3358,7 @@
                         </div>
                         <div class="history-card-players">${playersHtml}</div>
                     `;
+                    card.addEventListener('click', () => showHistoryDetail(entry));
                     container.appendChild(card);
                 });
             }
@@ -3252,6 +3369,136 @@
 
         function clearHistory() {
             document.getElementById('confirmClearHistoryModal').style.display = 'flex';
+        }
+
+        let _currentHistoryEntry = null;
+
+        function closeHistoryDetailModal(e) {
+            if (e && e.target !== document.getElementById('historyDetailModal')) return;
+            document.getElementById('historyDetailModal').style.display = 'none';
+        }
+
+        function showHistoryDetail(entry) {
+            _currentHistoryEntry = entry;
+            document.getElementById('historyDetailTitle').textContent = `${entry.emoji} ${entry.gameName} · ${entry.date}`;
+            const container = document.getElementById('historyDetailTable');
+            container.innerHTML = buildHistoryDetailTable(entry);
+            document.getElementById('historyDetailModal').style.display = 'flex';
+        }
+
+        function shareHistoryEntry() {
+            const entry = _currentHistoryEntry;
+            if (!entry) return;
+            const results = [...entry.results].sort((a, b) => b.score - a.score);
+            let text = `${entry.emoji} ${entry.gameName}\n📅 ${entry.date}\n\n`;
+            results.forEach((r, i) => {
+                text += `${i + 1}. ${r.player}: ${r.score} pts${i === 0 ? ' 👑' : ''}\n`;
+            });
+            text += `\nBGTime — https://jegomei.github.io/BG-clock-and-score/`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Resultados copiados al portapapeles!\n\nAhora puedes pegarlos en WhatsApp, Telegram, etc.');
+                }).catch(() => fallbackCopyText(text));
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+
+        function buildHistoryDetailTable(entry) {
+            const players = entry.players || entry.results.map(r => r.player);
+            const type = entry.scoringType;
+            let html = '<div class="table-wrapper"><table class="score-table">';
+
+            if (type === 'rounds' || type === 'target_score') {
+                const scores = entry.roundScores; // [playerIndex][roundIndex]
+                if (scores && scores.length && scores[0].length) {
+                    const numRounds = scores[0].length;
+                    html += '<thead><tr><th></th>';
+                    players.forEach(p => { html += `<th>${p}</th>`; });
+                    html += '</tr></thead><tbody>';
+                    for (let r = 0; r < numRounds; r++) {
+                        html += `<tr><td><strong>R${r+1}</strong></td>`;
+                        players.forEach((p, pi) => {
+                            html += `<td>${scores[pi]?.[r] ?? 0}</td>`;
+                        });
+                        html += '</tr>';
+                    }
+                } else {
+                    // Sin detalle de rondas (partida antigua)
+                    return buildSimpleResultsTable(entry);
+                }
+            } else if (type === 'rounds_with_items') {
+                const roundItems = entry.roundItems || [];
+                const roundItemScores = entry.roundItemScores; // [playerIndex][roundIndex][itemIndex]
+                if (roundItems.length && roundItemScores && roundItemScores.length && roundItemScores[0].length) {
+                    const numRounds = roundItemScores[0].length;
+                    html += '<thead><tr><th>Ítem</th>';
+                    players.forEach(p => { html += `<th>${p}</th>`; });
+                    html += '</tr></thead><tbody>';
+                    for (let r = 0; r < numRounds; r++) {
+                        roundItems.forEach((item, ii) => {
+                            html += `<tr><td><em${ii === 0 ? ' style="font-weight:600"' : ''}>R${r+1}${ii === 0 ? '' : ''} ${item.name}${item.negative ? ' (-)' : ''}</em></td>`;
+                            players.forEach((p, pi) => {
+                                const val = roundItemScores[pi]?.[r]?.[ii] ?? 0;
+                                html += `<td>${val}</td>`;
+                            });
+                            html += '</tr>';
+                        });
+                        // Subtotal de la ronda
+                        html += `<tr style="border-top:2px solid var(--border-color)"><td><strong>Subtotal R${r+1}</strong></td>`;
+                        players.forEach((p, pi) => {
+                            let sub = 0;
+                            roundItems.forEach((item, ii) => {
+                                const val = roundItemScores[pi]?.[r]?.[ii] ?? 0;
+                                sub += item.negative ? -val : val;
+                            });
+                            html += `<td><strong>${sub}</strong></td>`;
+                        });
+                        html += '</tr>';
+                    }
+                } else {
+                    return buildSimpleResultsTable(entry);
+                }
+            } else if (type === 'items') {
+                const items = entry.items || [];
+                const itemScores = entry.itemScores; // [playerIndex][itemIndex]
+                if (items.length && itemScores && itemScores.length) {
+                    html += '<thead><tr><th>Ítem</th>';
+                    players.forEach(p => { html += `<th>${p}</th>`; });
+                    html += '</tr></thead><tbody>';
+                    items.forEach((item, ii) => {
+                        html += `<tr><td><strong>${item.name}${item.negative ? ' (-)' : ''}</strong></td>`;
+                        players.forEach((p, pi) => {
+                            html += `<td>${itemScores[pi]?.[ii] ?? 0}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                } else {
+                    return buildSimpleResultsTable(entry);
+                }
+            } else {
+                return buildSimpleResultsTable(entry);
+            }
+
+            // Fila total
+            html += '<tr class="total-row"><td><strong>TOTAL</strong></td>';
+            players.forEach((p, pi) => {
+                const result = entry.results.find(r => r.player === p);
+                html += `<td><strong>${result ? result.score : 0}</strong></td>`;
+            });
+            html += '</tr></tbody></table></div>';
+            return html;
+        }
+
+        function buildSimpleResultsTable(entry) {
+            const players = entry.players || entry.results.map(r => r.player);
+            let html = '<div class="table-wrapper"><table class="score-table">';
+            html += '<thead><tr><th>Jugador</th><th>Puntos</th></tr></thead><tbody>';
+            entry.results.forEach((r, i) => {
+                html += `<tr class="${i === 0 ? 'total-row' : ''}"><td><strong>${i === 0 ? '👑 ' : ''}${r.player}</strong></td><td><strong>${r.score}</strong></td></tr>`;
+            });
+            html += '</tbody></table></div>';
+            return html;
         }
 
         function confirmClearHistory() {
