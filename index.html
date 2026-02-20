@@ -2,37 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Tracker de Juegos de Mesa</title>
     <style>
-        html {
-            height: 100%;
-            background: linear-gradient(135deg,
-            var(--bg-gradient-start) 0%,
-            var(--bg-gradient-end) 100%);
-        }
-        /* FONDO GLOBAL iOS FIX */
-        .app-background {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background: linear-gradient(135deg,
-                var(--bg-gradient-start) 0%,
-                var(--bg-gradient-end) 100%);
-        }
-
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        @supports (height: 100dvh) {
-          body {
-            min-height: 100dvh;
-          }
         }
 
         :root {
@@ -120,26 +96,20 @@
                     drop-shadow(0 0 12px rgba(180,160,255,0.7));
             opacity: 1;
         }
-        
-        html, body {
-            height: 100%;
-        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /*background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);*/
-            min-height: 100svh;
-            min-height: 100dvh;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
+            min-height: 100dvh;
             background-attachment: fixed;
-            background-repeat: no-repeat;
-            overscroll-behavior: none;
             padding: 4px 10px 10px 10px;
-            padding-top: max(10px, env(safe-area-inset-top));
+            padding-top: max(4px, env(safe-area-inset-top));
             padding-bottom: max(10px, env(safe-area-inset-bottom));
             padding-left: max(10px, env(safe-area-inset-left));
             padding-right: max(10px, env(safe-area-inset-right));
             -webkit-text-size-adjust: 100%;
-            transition: background 0.3s ease;        
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -1328,13 +1298,29 @@
             line-height: 1;
         }
         .custom-tpl-btn:active { background: none; transform: none; }
+
+        /* Overtime: fondo rojo parpadeante */
+        @keyframes overtimePulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.55; }
+        }
+        .timer-overtime #timeDisplayLarge {
+            color: #ff4444 !important;
+            text-shadow: 0 0 20px rgba(255,60,60,0.8), 0 6px 20px rgba(0,0,0,0.35) !important;
+            animation: overtimePulse 0.9s ease-in-out infinite;
+        }
+        .timer-overtime.timer-fullscreen {
+            background: linear-gradient(to bottom, #1a0000 0%, #111111 100%) !important;
+        }
+        /* Últimos 5s: display amarillo */
+        .timer-warning #timeDisplayLarge {
+            color: #ffdd57 !important;
+            text-shadow: 0 0 14px rgba(255,210,50,0.7), 0 6px 20px rgba(0,0,0,0.35) !important;
+        }
     </style>
     <script src="games.js"></script>
 </head>
 <body>
-    <body>
-  <div class="app-background"></div>
-
     <div class="top-bar">
         <button class="top-bar-btn" onclick="resetGame()" aria-label="Inicio">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2222,6 +2208,7 @@
 
         function updateTimerGradient() {
             const card = document.getElementById('timerFullscreen');
+            if (card.classList.contains('timer-overtime')) return;  // overtime maneja su propio fondo
             const color = gameData.orderedColors[timerData.currentPlayerIndex];
             const initialTime = gameData.timePerPlayer;
             const remaining = Math.max(0, timerData.timeRemaining);
@@ -2248,35 +2235,74 @@
             updateTimerGradient();
         }
 
+        // ── Audio: tic-tac con Web Audio API ─────────────────────────
+        let _audioCtx = null;
+        function _getAudioCtx() {
+            if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return _audioCtx;
+        }
+        function playTick(isLast) {
+            try {
+                const ctx = _getAudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = isLast ? 880 : 660;   // tono más agudo en el último
+                gain.gain.setValueAtTime(0.35, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.08);
+            } catch(e) {}
+        }
+
         function startCountdown() {
-            if (timerData.interval) {
-                clearInterval(timerData.interval);
-            }
+            if (timerData.interval) clearInterval(timerData.interval);
 
             timerData.interval = setInterval(() => {
-                if (!timerData.isPaused) {
-                    timerData.timeRemaining--;
-                    timerData.playerTimeUsed[timerData.currentPlayerIndex]++;
+                if (timerData.isPaused) return;
 
-                    if (gameData.timerMode === 'chess') {
-                        timerData.playerTimeRemaining[timerData.currentPlayerIndex] = timerData.timeRemaining;
+                timerData.timeRemaining--;
+                timerData.playerTimeUsed[timerData.currentPlayerIndex]++;
+
+                if (gameData.timerMode === 'chess') {
+                    timerData.playerTimeRemaining[timerData.currentPlayerIndex] = timerData.timeRemaining;
+                }
+
+                const card = document.getElementById('timerFullscreen');
+                const display = document.getElementById('timeDisplayLarge');
+
+                if (timerData.timeRemaining > 0) {
+                    // Tiempo normal
+                    card.classList.remove('timer-overtime');
+                    if (timerData.timeRemaining <= 5) {
+                        card.classList.add('timer-warning');
+                        playTick(timerData.timeRemaining === 1);
+                    } else {
+                        card.classList.remove('timer-warning');
                     }
-
-                    document.getElementById('timeDisplayLarge').textContent = formatTime(timerData.timeRemaining);
+                    display.textContent = formatTime(timerData.timeRemaining);
                     updateTimerGradient();
 
-                    if (timerData.timeRemaining <= 0) {
-                        clearInterval(timerData.interval);
-                        timerData.interval = null;
-                        const playerName = gameData.orderedPlayers[timerData.currentPlayerIndex];
-                        alert(`¡Tiempo agotado para ${playerName}!`);
-                        nextPlayerTurn();
-                    }
+                } else {
+                    // Tiempo extra (timeRemaining es 0 o negativo)
+                    card.classList.remove('timer-warning');
+                    card.classList.add('timer-overtime');
+                    const overtime = -timerData.timeRemaining;  // segundos de extra
+                    display.textContent = '+' + formatTime(overtime);
+                    // Fondo rojo fijo
+                    card.style.background = 'linear-gradient(to bottom, #3a0000 0%, #111111 100%)';
+                    // Sonido cada segundo en overtime
+                    playTick(false);
                 }
             }, 1000);
         }
 
         function nextPlayerTurn() {
+            // Limpiar estado visual de overtime/warning
+            const card = document.getElementById('timerFullscreen');
+            card.classList.remove('timer-overtime', 'timer-warning');
+
             gameData.playerTotalTimes[timerData.currentPlayerIndex] += timerData.playerTimeUsed[timerData.currentPlayerIndex];
             timerData.playerTimeUsed[timerData.currentPlayerIndex] = 0;
 
