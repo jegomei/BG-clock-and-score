@@ -1984,7 +1984,9 @@
 
         <!-- Pantalla 4: Configuración de puntuación -->
         <div id="scoringSetupScreen" class="screen">
-            <h1><span id="gameDisplayScoring"></span></h1>
+            <h1>Configurar puntuación</h1>
+            <!-- Span oculto para compatibilidad con JS -->
+            <span id="gameDisplayScoring" style="display:none;"></span>
 
             <!-- Radios ocultos — la lógica JS los sigue leyendo -->
             <input type="radio" name="scoringType" value="rounds"           id="roundsRadio"          checked style="display:none">
@@ -2018,10 +2020,19 @@
 
             <!-- Configuración de Rondas -->
             <div id="roundsConfig" class="scoring-detail-panel">
-                <div class="sdp-row">
-                    <label for="numRounds">Número de rondas</label>
-                    <input type="number" id="numRounds" value="5" min="1" max="20" class="sdp-number">
+                <div class="sdp-row" style="margin-bottom:0;">
+                    <label>Número de rondas</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button onclick="stepRounds(-1)" style="width:40px;height:40px;border-radius:50%;padding:0;min-height:unset;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <span id="numRoundsDisplay" style="font-size:22px;font-weight:700;color:var(--text-primary);min-width:32px;text-align:center;">3</span>
+                        <button onclick="stepRounds(1)" style="width:40px;height:40px;border-radius:50%;padding:0;min-height:unset;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
                 </div>
+                <input type="hidden" id="numRounds" value="3">
                 <input type="radio" name="roundScoring" value="all_at_end"    id="allAtEndRadio"    style="display:none">
                 <input type="radio" name="roundScoring" value="round_by_round" id="roundByRoundRadio" checked style="display:none">
             </div>
@@ -2045,10 +2056,19 @@
 
             <!-- Configuración de Rondas con Ítems -->
             <div id="roundsWithItemsConfig" class="scoring-detail-panel" style="display:none;">
-                <div class="sdp-row">
-                    <label for="numRoundsWithItems">Número de rondas</label>
-                    <input type="number" id="numRoundsWithItems" value="3" min="1" max="10" class="sdp-number">
+                <div class="sdp-row" style="margin-bottom:8px;">
+                    <label>Número de rondas</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button onclick="stepRoundsWithItems(-1)" style="width:40px;height:40px;border-radius:50%;padding:0;min-height:unset;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                        <span id="numRoundsWithItemsDisplay" style="font-size:22px;font-weight:700;color:var(--text-primary);min-width:32px;text-align:center;">3</span>
+                        <button onclick="stepRoundsWithItems(1)" style="width:40px;height:40px;border-radius:50%;padding:0;min-height:unset;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        </button>
+                    </div>
                 </div>
+                <input type="hidden" id="numRoundsWithItems" value="3">
                 <div id="roundItemsContainer">
                     <div class="scoring-item">
                         <div class="scoring-item-header">
@@ -2089,8 +2109,8 @@
             <div id="scoringTableContainer"></div>
 
             <div class="button-group">
-                <button onclick="calculateResults()">Calcular Resultados</button>
-                <button id="btnVolverTimerScoring" class="secondary" style="display:none;" onclick="returnToTimerFromScoring()" style="display:flex;align-items:center;justify-content:center;gap:6px;"><svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>Volver al Temporizador</button>
+                <button id="btnScoringBack" class="secondary" style="display:none;">← Atrás</button>
+                <button id="btnScoringContinue" onclick="calculateResults()">Calcular Resultados</button>
             </div>
         </div>
 
@@ -2317,6 +2337,24 @@
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function stepRounds(delta) {
+            const input = document.getElementById('numRounds');
+            const display = document.getElementById('numRoundsDisplay');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            display.textContent = val;
+        }
+
+        function stepRoundsWithItems(delta) {
+            const input = document.getElementById('numRoundsWithItems');
+            const display = document.getElementById('numRoundsWithItemsDisplay');
+            let val = parseInt(input.value) + delta;
+            if (val < 1) val = 1;
+            input.value = val;
+            display.textContent = val;
         }
 
         function stepTime(delta) {
@@ -3171,6 +3209,18 @@
             
             table += '</tbody></table></div>';
             container.innerHTML = table;
+
+            const continueBtn = document.getElementById('btnScoringContinue');
+            const backBtn = document.getElementById('btnScoringBack');
+            continueBtn.textContent = 'Calcular Resultados';
+            continueBtn.onclick = calculateResults;
+            if (gameData.usedTimer) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = returnToTimerFromScoring;
+            } else {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => showScreen('scoringSetupScreen');
+            }
         }
 
         function createAllRoundsTable(container) {
@@ -3198,6 +3248,18 @@
             
             html += '</tbody></table></div>';
             container.innerHTML = html;
+
+            const continueBtn = document.getElementById('btnScoringContinue');
+            const backBtn = document.getElementById('btnScoringBack');
+            continueBtn.textContent = 'Calcular Resultados';
+            continueBtn.onclick = calculateResults;
+            if (gameData.usedTimer) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = returnToTimerFromScoring;
+            } else {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => showScreen('scoringSetupScreen');
+            }
         }
 
         function createRoundByRoundTable(container) {
@@ -3245,22 +3307,25 @@
             
             container.innerHTML = html;
             
-            const continueBtn = document.querySelector('#scoringScreen .button-group button:first-child');
-            const timerBtn = document.getElementById('btnVolverTimerScoring');
-
-            // Mostrar botón de volver al temporizador solo si se usó y no es la última ronda
-            if (gameData.usedTimer && gameData.currentRound < gameData.numRounds) {
-                timerBtn.style.display = 'inline-block';
-            } else {
-                timerBtn.style.display = 'none';
-            }
+            const continueBtn = document.getElementById('btnScoringContinue');
+            const backBtn = document.getElementById('btnScoringBack');
 
             if (gameData.currentRound < gameData.numRounds) {
-                continueBtn.textContent = 'Guardar Ronda →';
+                continueBtn.textContent = 'Siguiente Ronda →';
                 continueBtn.onclick = saveRoundAndContinue;
             } else {
                 continueBtn.textContent = 'Calcular Resultados';
                 continueBtn.onclick = saveRoundAndFinish;
+            }
+
+            if (gameData.usedTimer) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => returnToTimerFromScoring();
+            } else if (gameData.currentRound > 1) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => scoringGoBack();
+            } else {
+                backBtn.style.display = 'none';
             }
         }
 
@@ -3269,13 +3334,29 @@
                 const score = parseInt(document.getElementById(`round-score-${playerIndex}`).value) || 0;
                 gameData.roundScores[playerIndex].push(score);
             });
-            
             gameData.currentRound++;
-
-            // Si se usó temporizador, volver a él para jugar la siguiente ronda
             if (gameData.usedTimer) {
                 returnToTimerFromScoring();
             } else {
+                createRoundByRoundTable(document.getElementById('scoringTableContainer'));
+            }
+        }
+
+        function scoringGoBack() {
+            if (gameData.usedTimer) {
+                returnToTimerFromScoring();
+                return;
+            }
+            if (gameData.currentRound <= 1) return;
+            gameData.currentRound--;
+            if (gameData.scoringType === 'rounds_with_items') {
+                gameData.roundItemScores.forEach(ps => ps.pop());
+                createRoundWithItemsTable(document.getElementById('scoringTableContainer'));
+            } else if (gameData.scoringType === 'target_score') {
+                gameData.roundScores.forEach(ps => ps.pop());
+                createTargetScoreTable(document.getElementById('scoringTableContainer'));
+            } else {
+                gameData.roundScores.forEach(ps => ps.pop());
                 createRoundByRoundTable(document.getElementById('scoringTableContainer'));
             }
         }
@@ -3363,18 +3444,25 @@
 
             container.innerHTML = html;
 
-            const continueBtn = document.querySelector('#scoringScreen .button-group button:first-child');
-            const timerBtn = document.getElementById('btnVolverTimerScoring');
+            const continueBtn = document.getElementById('btnScoringContinue');
+            const backBtn = document.getElementById('btnScoringBack');
 
             if (winnerIndex !== -1) {
-                // Alguien ya ganó, solo mostrar calcular
                 continueBtn.textContent = 'Ver Resultados';
                 continueBtn.onclick = saveTargetRoundAndFinish;
-                if (timerBtn) timerBtn.style.display = 'none';
+                backBtn.style.display = 'none';
             } else {
-                continueBtn.textContent = 'Guardar Ronda →';
+                continueBtn.textContent = 'Siguiente Ronda →';
                 continueBtn.onclick = saveTargetRoundAndContinue;
-                if (timerBtn) timerBtn.style.display = gameData.usedTimer ? 'inline-block' : 'none';
+                if (gameData.usedTimer) {
+                    backBtn.style.display = 'inline-block';
+                    backBtn.onclick = () => returnToTimerFromScoring();
+                } else if (gameData.currentRound > 1) {
+                    backBtn.style.display = 'inline-block';
+                    backBtn.onclick = () => scoringGoBack();
+                } else {
+                    backBtn.style.display = 'none';
+                }
             }
         }
 
@@ -3492,16 +3580,23 @@
                 });
             });
             
-            const continueBtn = document.querySelector('#scoringScreen .button-group button:first-child');
-            const timerBtn = document.getElementById('btnVolverTimerScoring');
+            const continueBtn = document.getElementById('btnScoringContinue');
+            const backBtn = document.getElementById('btnScoringBack');
             if (gameData.currentRound < gameData.numRounds) {
-                continueBtn.textContent = gameData.usedTimer ? 'Guardar Ronda →' : 'Siguiente Ronda →';
+                continueBtn.textContent = 'Siguiente Ronda →';
                 continueBtn.onclick = saveRoundWithItemsAndContinue;
-                if (timerBtn) timerBtn.style.display = gameData.usedTimer ? 'inline-block' : 'none';
             } else {
                 continueBtn.textContent = 'Calcular Resultados';
                 continueBtn.onclick = saveRoundWithItemsAndFinish;
-                if (timerBtn) timerBtn.style.display = 'none';
+            }
+            if (gameData.usedTimer) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => returnToTimerFromScoring();
+            } else if (gameData.currentRound > 1) {
+                backBtn.style.display = 'inline-block';
+                backBtn.onclick = () => scoringGoBack();
+            } else {
+                backBtn.style.display = 'none';
             }
         }
 
