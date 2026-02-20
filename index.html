@@ -2607,6 +2607,14 @@
                 timerData.interval = null;
             }
 
+            // Limpiar estado visual del overlay de pausa al salir del timer
+            timerData.isPaused = false;
+            const pauseIcon = document.getElementById('pauseIcon');
+            if (pauseIcon) pauseIcon.innerHTML = SVG_PAUSE;
+            document.getElementById('pausedOverlay').classList.remove('visible');
+            const nextBtn = document.querySelector('.timer-btn.next-btn');
+            if (nextBtn) nextBtn.style.pointerEvents = '';
+
             // Si ya estamos en modo ronda a ronda activo o target_score, ir directo a la ronda pendiente
             const isActiveRoundMode = (
                 (gameData.roundScores.length > 0 && (
@@ -2646,6 +2654,15 @@
                 return;
             }
             showScreen('timerScreen');
+            // Asegurarse de que el timer no quede en pausa al volver
+            timerData.isPaused = false;
+            const pauseIcon = document.getElementById('pauseIcon');
+            if (pauseIcon) pauseIcon.innerHTML = SVG_PAUSE;
+            const overlay = document.getElementById('pausedOverlay');
+            if (overlay) overlay.classList.remove('visible');
+            const nextBtn = document.querySelector('.timer-btn.next-btn');
+            if (nextBtn) nextBtn.style.pointerEvents = '';
+
             if (!timerData.interval) {
                 startCountdown();
             }
