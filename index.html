@@ -579,6 +579,138 @@
             opacity: 0.6;
         }
 
+        /* ── Tiebreaker Modal ─────────────────────────── */
+        .tiebreaker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInOverlay 0.2s ease both;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .tiebreaker-modal {
+            background: var(--container-bg);
+            border-radius: 20px;
+            padding: 24px 20px 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+            animation: slideUpModal 0.28s cubic-bezier(0.34,1.2,0.64,1) both;
+        }
+
+        @keyframes slideUpModal {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .tiebreaker-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .tiebreaker-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        .tiebreaker-score-badge {
+            display: inline-block;
+            background: var(--btn-primary-gradient);
+            color: #fff;
+            border-radius: 8px;
+            padding: 2px 9px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .tiebreaker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Reutiliza .order-item / .order-btn pero dentro del modal */
+        .tiebreaker-list .order-item {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+            border-width: 2px;
+            transition: transform 0.15s;
+        }
+
+        .tiebreaker-list .order-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .tiebreaker-list .order-btn {
+            background: rgba(0,0,0,0.25);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            min-height: unset;
+            padding: 0;
+            margin: 0;
+        }
+
+        .tiebreaker-list .order-btn:disabled {
+            opacity: 0.25;
+        }
+
+        .tiebreaker-position-hint {
+            font-size: 12px;
+            color: rgba(255,255,255,0.75);
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-right: 4px;
+        }
+
+        .tiebreaker-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tiebreaker-confirm-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: var(--btn-green-gradient);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: opacity 0.2s;
+        }
+
+        .tiebreaker-confirm-btn:active { opacity: 0.8; }
+
+        .tiebreaker-progress {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        /* ── End Tiebreaker Modal ─────────────────────── */
+
         /* ── End Stats Screen ─────────────────────────── */
 
         .top-bar {
@@ -2762,7 +2894,7 @@
                 <button onclick="exportHistory()" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
                 <button onclick="triggerImport()" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar</button>
                 <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importHistory(event)">
-                <button class="secondary" onclick="clearHistory()" style="display:flex;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Borrar historial</button>
+                <button class="secondary" onclick="clearHistory()" style="display:flex;align-items:center;justify-content:center;background:var(--btn-red-gradient);color:white;border:none;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;flex-shrink:0;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Borrar historial</button>
             </div>
         </div>
 
@@ -2984,14 +3116,14 @@
 
         const PLAYER_PALETTE = [
             '#E74C3C', // rojo
+            '#3498DB', // azul
+            '#2ECC71', // verde
+            '#F1C40F', // amarillo
             '#E91E8C', // rosa
             '#9B59B6', // violeta
-            '#3498DB', // azul
             '#00BCD4', // cian
             '#1ABC9C', // turquesa
-            '#2ECC71', // verde
             '#8BC34A', // verde lima
-            '#F1C40F', // amarillo
             '#E67E22', // naranja
             '#795548', // marrón
             '#34495E', // gris pizarra
@@ -4361,13 +4493,132 @@
                 }
             });
 
-            // Guardar para persistencia y historial
+            // Detectar grupos de empate
+            const tieGroups = [];
+            let i = 0;
+            while (i < results.length) {
+                let j = i + 1;
+                while (j < results.length && results[j].score === results[i].score) j++;
+                if (j - i > 1) {
+                    tieGroups.push({ startIndex: i, players: results.slice(i, j) });
+                }
+                i = j;
+            }
+
+            if (tieGroups.length > 0) {
+                // Hay empates: mostrar modal de desempate secuencial
+                _resolveTiesSequentially(tieGroups, 0, results, function(resolvedResults) {
+                    _finalizeFinalResults(resolvedResults);
+                });
+            } else {
+                _finalizeFinalResults(results);
+            }
+        }
+
+        function _finalizeFinalResults(results) {
             gameData.lastResults = results;
             saveToHistory(results);
-
             document.getElementById('gameDisplayResults') && (document.getElementById('gameDisplayResults').textContent = gameData.gameName);
             renderResultItems(results, document.getElementById('resultsWinner'), document.getElementById('resultsContainer'));
             showScreen('resultsScreen');
+        }
+
+        function _resolveTiesSequentially(tieGroups, groupIndex, results, callback) {
+            if (groupIndex >= tieGroups.length) {
+                callback(results);
+                return;
+            }
+
+            const group = tieGroups[groupIndex];
+            const startPos = group.startIndex + 1; // posición 1-based
+
+            _showTiebreakerModal(
+                group.players,
+                startPos,
+                groupIndex,
+                tieGroups.length,
+                function(orderedPlayers) {
+                    // Reemplazar el segmento en results con el orden elegido
+                    for (let k = 0; k < orderedPlayers.length; k++) {
+                        results[group.startIndex + k] = orderedPlayers[k];
+                    }
+                    _resolveTiesSequentially(tieGroups, groupIndex + 1, results, callback);
+                }
+            );
+        }
+
+        function _showTiebreakerModal(players, startPos, currentGroup, totalGroups, callback) {
+            let orderedPlayers = [...players];
+
+            const overlay = document.createElement('div');
+            overlay.className = 'tiebreaker-overlay';
+            document.body.appendChild(overlay);
+
+            function posLabel(pos) {
+                return pos === 1 ? '🥇 1.º' : pos === 2 ? '🥈 2.º' : pos === 3 ? '🥉 3.º' : pos + '.º';
+            }
+
+            function render() {
+                const progressHTML = totalGroups > 1
+                    ? `<div class="tiebreaker-progress">Empate ${currentGroup + 1} de ${totalGroups}</div>`
+                    : '';
+                const score = orderedPlayers[0].score;
+
+                const modal = document.createElement('div');
+                modal.className = 'tiebreaker-modal';
+                modal.innerHTML = `
+                    <div class="tiebreaker-title">¡Hay un empate!</div>
+                    <div class="tiebreaker-subtitle">Estos jugadores han quedado empatados a <strong>${score} puntos</strong>.<br>Usa las flechas para ordenarlos.</div>
+                    ${progressHTML}
+                    <div class="tiebreaker-list" id="tiebreakerList"></div>
+                    <div class="tiebreaker-actions">
+                        <button class="tiebreaker-confirm-btn" id="tiebreakerConfirm">Confirmar orden ✓</button>
+                    </div>
+                `;
+                overlay.innerHTML = '';
+                overlay.appendChild(modal);
+
+                const list = modal.querySelector('#tiebreakerList');
+                orderedPlayers.forEach((p, i) => {
+                    const color = p.color || '#667eea';
+                    const div = document.createElement('div');
+                    div.className = 'order-item';
+                    div.style.backgroundColor = color;
+                    div.style.borderColor = color;
+                    div.innerHTML = `
+                        <span class="order-player-name" style="color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.4);">${p.player}</span>
+                        <div class="order-controls">
+                            <button class="order-btn" data-dir="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                            </button>
+                            <button class="order-btn" data-dir="down" data-i="${i}" ${i === orderedPlayers.length - 1 ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                list.querySelectorAll('.order-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const i = parseInt(btn.dataset.i);
+                        const dir = btn.dataset.dir;
+                        if (dir === 'up' && i > 0) {
+                            [orderedPlayers[i], orderedPlayers[i - 1]] = [orderedPlayers[i - 1], orderedPlayers[i]];
+                        } else if (dir === 'down' && i < orderedPlayers.length - 1) {
+                            [orderedPlayers[i], orderedPlayers[i + 1]] = [orderedPlayers[i + 1], orderedPlayers[i]];
+                        }
+                        render();
+                    });
+                });
+
+                modal.querySelector('#tiebreakerConfirm').addEventListener('click', () => {
+                    document.body.removeChild(overlay);
+                    callback(orderedPlayers);
+                });
+            }
+
+            render();
         }
 
         const MEDAL = ['1', '2', '3'];
