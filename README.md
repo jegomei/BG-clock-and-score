@@ -9,7 +9,7 @@
 ## 📸 Capturas
 
 ![Jugadores y temporizador](screenshots/BGTime1.png)
-![Anotar puntos y estadísticas](screenshots/BGTime1.png)
+![Anotar puntos y estadísticas](screenshots/BGTime2.png)
 
 ---
 
