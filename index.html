@@ -5073,7 +5073,7 @@
             results.forEach((r, i) => {
                 text += `${i + 1}. ${r.player}: ${r.score} pts${i === 0 ? ' 👑' : ''}\n`;
             });
-            text += `\nBGTime — https://jegomei.github.io/BG-clock-and-score/`;
+            text += `\nBGTime — https://jegomei.github.io/BGTime/`;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     alert('✅ Resultados copiados al portapapeles!\n\nAhora puedes pegarlos en WhatsApp, Telegram, etc.');
